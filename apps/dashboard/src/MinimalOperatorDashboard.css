@@ -13,7 +13,10 @@
     linear-gradient(180deg, rgba(9, 12, 14, 0.98), #050607 56%),
     var(--bg);
   color: var(--text);
+  isolation: isolate;
+  min-width: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
@@ -21,7 +24,9 @@
   display: grid;
   grid-template-rows: auto 1fr;
   min-height: 100vh;
-  padding: 14px;
+  min-height: 100dvh;
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
 }
 
 .homeTopbar {
@@ -74,7 +79,22 @@
   justify-items: center;
   min-height: 132px;
   padding: 8px;
+  touch-action: manipulation;
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.iconRoomButton:active,
+.backButton:active {
+  filter: brightness(1.18);
+  transform: scale(0.97);
+}
+
+.roomLabel {
+  color: var(--muted);
+  font-size: clamp(0.82rem, 2vw, 1rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
 }
 
 .iconRoomButton:hover {
@@ -95,7 +115,10 @@
   margin-inline: auto;
   max-width: 980px;
   min-height: 100vh;
-  padding: 14px;
+  min-height: 100dvh;
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  width: 100%;
 }
 
 .backButton {
@@ -109,6 +132,7 @@
   font-size: 2rem;
   height: 56px;
   justify-content: center;
+  touch-action: manipulation;
   width: 56px;
 }
 
@@ -180,7 +204,7 @@
 .forexLockStrip {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .forexLockStrip span {
@@ -198,6 +222,14 @@
 .pairBadge {
   align-items: center;
   grid-template-columns: auto minmax(0, 1fr) auto;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .detailGrid,
+  .pairGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .pairFlags {
@@ -214,7 +246,8 @@
 @media (max-width: 640px) {
   .minimalHome,
   .detailRoom {
-    padding: 10px;
+    padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
   }
 
   .iconRoomGrid,
@@ -235,5 +268,25 @@
 
   .pairBadge small {
     grid-column: 2;
+  }
+}
+
+@media (max-width: 380px) {
+  .pairFlags {
+    font-size: 1.65rem;
+  }
+
+  .pairBadge {
+    padding-inline: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconRoomButton {
+    transition: none;
+  }
+
+  .iconRoomButton:hover {
+    transform: none;
   }
 }
