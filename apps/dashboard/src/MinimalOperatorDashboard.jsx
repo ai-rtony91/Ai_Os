@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './MinimalOperatorDashboard.css';
 import MeasurementConsole from './components/aios_measurement/MeasurementConsole';
+import useRuntimeVisibility from './hooks/useRuntimeVisibility';
 
 const ROOMS = [
   { id: 'safety', icon: '🔐', label: 'Access' },
@@ -20,7 +21,17 @@ function StatusPill({ children, tone = 'neutral' }) {
   return <span className={`statusPill statusPill--${tone}`}>{children}</span>;
 }
 
-function Home({ onOpen }) {
+function runtimeLabel(runtimeVisibility) {
+  if (runtimeVisibility.loading) return 'Checking';
+  if (runtimeVisibility.runtimeState === 'available') {
+    return runtimeVisibility.displayModel?.runtime?.status ?? 'Available';
+  }
+  if (runtimeVisibility.runtimeState === 'stale') return 'Stale';
+  if (runtimeVisibility.runtimeState === 'invalid') return 'Invalid';
+  return 'Unavailable';
+}
+
+function Home({ onOpen, runtimeVisibility }) {
   return (
     <section className="surface homeSurface" aria-labelledby="home-title">
       <div className="heroCopy">
@@ -30,6 +41,7 @@ function Home({ onOpen }) {
       </div>
       <div className="systemSummary" aria-label="Critical system status">
         <div><span>System</span><strong>Local preview</strong></div>
+        <div><span>Runtime</span><strong>{runtimeLabel(runtimeVisibility)}</strong></div>
         <div><span>Execution</span><strong className="dangerText">Off</strong></div>
         <div><span>Broker</span><strong className="dangerText">Locked</strong></div>
       </div>
@@ -120,6 +132,7 @@ function Access({ reasoning, onReasoningChange }) {
 export default function MinimalOperatorDashboard() {
   const [activeRoom, setActiveRoom] = useState('home');
   const [reasoning, setReasoning] = useState(2);
+  const runtimeVisibility = useRuntimeVisibility();
   const backButtonRef = useRef(null);
   const lastRoomButtonRef = useRef(null);
   const roomIds = useMemo(() => new Set(ROOMS.map(({ id }) => id)), []);
@@ -141,14 +154,14 @@ export default function MinimalOperatorDashboard() {
   }, [room]);
 
   return (
-    <main className="minimalOperatorDashboard" data-reasoning={reasoning}>
+    <main className="minimalOperatorDashboard" data-reasoning={reasoning} data-runtime-state={runtimeVisibility.runtimeState}>
       <div className="ambientGlow" aria-hidden="true" />
       <header className="appBar">
         <button className="brandButton" onClick={goHome} type="button" aria-label="AIOS home">AIOS<span>◆</span></button>
         <div className="appStatus"><StatusPill tone="danger">Exec off</StatusPill><span className="reasoningReadout">Reasoning: {REASONING_LEVELS[reasoning]}</span></div>
       </header>
       {room !== 'home' && <button ref={backButtonRef} className="backButton" onClick={goHome} type="button" aria-label="Back to AIOS home">← <span>Home</span></button>}
-      {room === 'home' && <Home onOpen={openRoom} />}
+      {room === 'home' && <Home onOpen={openRoom} runtimeVisibility={runtimeVisibility} />}
       {room === 'forex' && <Forex />}
       {room === 'music' && <Music />}
       {room === 'system' && <Utilities />}
