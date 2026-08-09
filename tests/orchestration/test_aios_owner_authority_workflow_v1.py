@@ -3,11 +3,14 @@ import json
 import pytest
 
 from automation.orchestration.aios_owner_authority_workflow_v1 import (
+    ApprovalBroker,
     OwnerAuthorityManifestError,
+    build_owner_session_queue,
     build_owner_authority_plan,
     first_pending_owner_bundle,
     load_manifest,
     phase_execution_mode,
+    prepare_phase,
     validate_manifest,
 )
 
@@ -66,3 +69,22 @@ def test_manifest_rejects_missing_or_parallel_phase_identity():
 
     with pytest.raises(OwnerAuthorityManifestError):
         validate_manifest(broken)
+
+
+def test_phase_facing_compatibility_wrappers_delegate_to_broker(monkeypatch):
+    calls = []
+
+    def fake_prepare(self, phase_id, decisions):
+        calls.append(("prepare", phase_id, list(decisions)))
+        return {"status": "CONTINUE_AUTONOMOUSLY"}
+
+    def fake_queue(self, phase_ids, decisions):
+        calls.append(("queue", list(phase_ids), list(decisions)))
+        return {"schema": "aios.approval_broker_queue.v1"}
+
+    monkeypatch.setattr(ApprovalBroker, "prepare_phase", fake_prepare)
+    monkeypatch.setattr(ApprovalBroker, "build_queue", fake_queue)
+
+    assert prepare_phase(1)["status"] == "CONTINUE_AUTONOMOUSLY"
+    assert build_owner_session_queue([4, 5])["schema"] == "aios.approval_broker_queue.v1"
+    assert calls == [("prepare", 1, []), ("queue", [4, 5], [])]

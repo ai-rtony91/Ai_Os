@@ -18,7 +18,11 @@ The workflow uses **PREPARE_BEHIND_GATE**:
 4. A protected transition stays blocked until a trusted owner-approval receipt is supplied through an existing approved authority path.
 5. After the receipt is validated upstream, AIOS may resume the corresponding work automatically.
 
-The helper module in this milestone does **not** validate owner identity or approval receipts. It only compiles and exposes the owner-action plan.
+The canonical phase-facing interface is `ApprovalBroker`, documented in
+`AIOS_APPROVAL_BROKER_V1.md`. The broker is non-authoritative: it does **not**
+validate owner identity or create approval receipts. It accepts a decision only
+through an injected trusted-verifier interface, then reports resume eligibility
+without executing the protected transition.
 
 ## Maximum owner interaction target
 
@@ -51,18 +55,31 @@ This milestone performs no:
 
 The manifest stores only descriptions of owner actions. Secret values, recovery codes, private keys, access tokens, and passkey material must never be written into the repository.
 
-## Integration with Part A
+## Canonical broker integration
 
-Part A remains the engineering/autonomy lane. It can later call:
+Part A remains the engineering/autonomy lane. Existing callers may continue to
+use compatibility projections, while new phase-facing work calls:
 
-- `load_manifest()`
-- `build_owner_authority_plan()`
-- `phase_execution_mode()`
-- `first_pending_owner_bundle()`
+- `ApprovalBroker.classify_phase()`
+- `ApprovalBroker.prepare_phase()`
+- `ApprovalBroker.build_queue()`
 
-The intended integration is a sidecar authority check around the existing A/B/C/D task lifecycle, not a replacement controller and not a second governance head.
+The broker delegates phase classification, four-bundle queue consolidation, and
+trusted-decision binding. It is a sidecar authority check around the existing
+A/B/C/D task lifecycle, not a replacement controller, approval authority, or
+second governance head. The manifest remains the sole phase-to-bundle mapping.
 
-Until that integration is separately implemented and validated, the merged A/B/C/D runner remains unchanged.
+The four bundles above are the only V1 operator checkpoints. Phases 1, 12, and
+13 continue without a checkpoint. Protected actions remain blocked until
+trusted verification succeeds, but documentation, schemas, tests, manifests,
+routing tables, validation artifacts, and sanitized preparation receipts may
+continue declaratively.
+
+No asynchronous worker, daemon, scheduler, network poller, timer, or background
+loop is introduced. Secret values and physical enrollment data never belong in
+the broker queue. Future approval-authority integrations must implement the
+narrow trusted-verifier interface. Components found only in unmerged pull
+requests are not automatically canonical.
 
 ## Deletion/consolidation rule
 
