@@ -2,9 +2,11 @@ import http from 'node:http'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import crypto from 'node:crypto'
 
+const require = createRequire(import.meta.url)
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 const port = Number(process.env.PORT || 8080)
 const repoRootDir = path.basename(rootDir) === 'dist'
@@ -57,6 +59,7 @@ function isLiveAutonomyBridgeStateRequest(requestUrl) {
 }
 
 function isDashboardProjectionRequest(requestUrl) { return new URL(requestUrl, 'http://localhost').pathname === '/aios-dashboard-projection' }
+function isRuntimeVisibilityRequest(requestUrl) { return new URL(requestUrl, 'http://localhost').pathname === '/api/runtime/visibility' }
 
 function serveDashboardProjection(request, response) {
   if (!dashboardProjectionPath.startsWith(path.resolve(repoRootDir) + path.sep)) return sendText(response, 403, 'Forbidden')
@@ -72,9 +75,37 @@ function serveDashboardProjection(request, response) {
   })
 }
 
+function serveRuntimeVisibility(request, response) {
+  try {
+    const runtimeApiServicePath = path.resolve(repoRootDir, 'services/orchestrator/runtimeApiService.js')
+    const { getVisibilitySnapshot } = require(runtimeApiServicePath)
+    const snapshot = getVisibilitySnapshot()
+    if (snapshot?.schema !== 'aios.runtime_visibility_api.v1' || snapshot?.mode !== 'READ_ONLY') {
+      sendText(response, 503, 'Runtime visibility unavailable')
+      return
+    }
+
+    const raw = JSON.stringify(snapshot)
+    response.writeHead(200, {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-aios-runtime-mode': 'READ_ONLY',
+      'x-aios-runtime-state': snapshot.frontend_contract?.display_state || 'UNKNOWN',
+    })
+    response.end(request.method === 'HEAD' ? undefined : raw)
+  } catch {
+    sendText(response, 503, 'Runtime visibility unavailable')
+  }
+}
+
 const server = http.createServer((request, response) => {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     sendText(response, 405, 'Method not allowed')
+    return
+  }
+
+  if (isRuntimeVisibilityRequest(request.url)) {
+    serveRuntimeVisibility(request, response)
     return
   }
 
