@@ -5,7 +5,9 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 import automation.forex_engine.forex_p1_practice_paper_campaign_runtime_v1 as runtime
-from automation.forex_engine.forex_p1_supervised_paper_campaign_v1 import CampaignHalt, CampaignWait
+from automation.forex_engine.forex_p1_supervised_paper_campaign_v1 import (
+    CampaignHalt, CampaignWait, StaleMarketDataWait,
+)
 from automation.forex_engine.oanda_read_only_client import OandaReadOnlyClient
 
 NOW = datetime(2026, 8, 10, 10, 30, tzinfo=timezone.utc)
@@ -127,13 +129,82 @@ def test_practice_data_failure_halts_fail_closed(monkeypatch, tmp_path):
     assert result == [CampaignHalt("PRACTICE_DATA_UNAVAILABLE")]
 
 
-def test_stale_or_invalid_data_halts_fail_closed(tmp_path):
-    stale_now = NOW + timedelta(hours=1)
+def test_transient_stale_waits_without_trade_or_evidence(tmp_path):
+    runtime_path = tmp_path / "active.json"
     result = list(runtime.completed_paper_records(
-        client([pricing(1.1)]), cycles=1, reviewer_identity="Anthony",
-        runtime_path=tmp_path / "active.json", now=lambda: stale_now, sleep=lambda _seconds: None,
+        client([pricing(1.1)]), cycles=1, reviewer_identity="Anthony", runtime_path=runtime_path,
+        now=lambda: NOW + timedelta(hours=1), sleep=lambda _seconds: None,
     ))
-    assert result == [CampaignHalt("STALE_MARKET_DATA")]
+    assert result == [StaleMarketDataWait(1, 1, 1, 3), CampaignHalt("OWNER_SESSION_CYCLE_LIMIT")]
+    assert not runtime_path.exists()
+
+
+def test_three_stale_cycles_wait_and_fourth_halts(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        runtime, "_capture",
+        lambda *_args: (_ for _ in ()).throw(ValueError("stale_market_data")),
+    )
+    sleeps = []
+    result = list(runtime.completed_paper_records(
+        client([]), cycles=5, reviewer_identity="Anthony", runtime_path=tmp_path / "active.json",
+        now=lambda: NOW, sleep=sleeps.append,
+    ))
+    assert result[:3] == [
+        StaleMarketDataWait(1, 5, 1, 3), StaleMarketDataWait(2, 5, 2, 3),
+        StaleMarketDataWait(3, 5, 3, 3),
+    ]
+    assert result[3] == CampaignHalt("PERSISTENT_STALE_MARKET_DATA")
+    assert sleeps == [runtime.POLL_INTERVAL_SECONDS] * 3
+
+
+def test_fresh_capture_resets_stale_streak(monkeypatch, tmp_path):
+    runtime_path = tmp_path / "active.json"
+    outcomes = iter([
+        ValueError("stale_market_data"),
+        ({"status": "NO_SIGNAL"}, {"ask": 1.1002}),
+        ValueError("stale_market_data"),
+    ])
+    def capture(*_args):
+        outcome = next(outcomes)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+    monkeypatch.setattr(runtime, "_capture", capture)
+    result = list(runtime.completed_paper_records(
+        client([]), cycles=3, reviewer_identity="Anthony", runtime_path=runtime_path,
+        now=lambda: NOW, sleep=lambda _seconds: None,
+    ))
+    assert result[0] == StaleMarketDataWait(1, 3, 1, 3)
+    assert result[1] == CampaignWait(2, 3)
+    assert result[2] == StaleMarketDataWait(3, 3, 1, 3)
+    assert not runtime_path.exists()
+
+
+def test_stale_cycle_cannot_change_active_paper_position(monkeypatch, tmp_path):
+    runtime_path = tmp_path / "active.json"
+    original = b'{"active": "paper-position"}\n'
+    runtime_path.write_bytes(original)
+    monkeypatch.setattr(
+        runtime, "_capture",
+        lambda *_args: (_ for _ in ()).throw(ValueError("stale_market_data")),
+    )
+    result = list(runtime.completed_paper_records(
+        client([]), cycles=1, reviewer_identity="Anthony", runtime_path=runtime_path,
+        now=lambda: NOW, sleep=lambda _seconds: None,
+    ))
+    assert isinstance(result[0], StaleMarketDataWait)
+    assert runtime_path.read_bytes() == original
+
+
+def test_invalid_non_stale_market_data_still_halts_fail_closed(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        runtime, "_capture",
+        lambda *_args: (_ for _ in ()).throw(ValueError("invalid_market_data")),
+    )
+    result = list(runtime.completed_paper_records(
+        client([]), cycles=1, reviewer_identity="Anthony", runtime_path=tmp_path / "active.json", sleep=lambda _seconds: None,
+    ))
+    assert result == [CampaignHalt("INVALID_MARKET_DATA")]
 
 
 def test_runtime_is_practice_get_only_and_safety_flags_false():

@@ -64,6 +64,16 @@ class CampaignWait:
     maximum_cycles: int
 
 
+@dataclass(frozen=True)
+class StaleMarketDataWait:
+    """A bounded stale-data cycle that produced no paper activity or evidence."""
+
+    cycle_number: int
+    maximum_cycles: int
+    stale_streak: int
+    maximum_stale_cycles: int
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -197,6 +207,19 @@ def _wait_progress(wait: CampaignWait, state: Mapping[str, Any], stream: TextIO)
     )
 
 
+def _stale_wait_progress(
+    wait: StaleMarketDataWait, state: Mapping[str, Any], stream: TextIO
+) -> None:
+    stream.write(
+        f"CYCLE: {wait.cycle_number}/{wait.maximum_cycles}\n"
+        "MARKET_DATA: STALE\n"
+        "ACTION: WAIT_FOR_FRESH_MARKET_DATA\n"
+        f"STALE_STREAK: {wait.stale_streak}/{wait.maximum_stale_cycles}\n"
+        f"QUALIFYING: {state['accepted_qualifying_trades']}/30\n"
+        f"P1 STATUS: {state['p1_status']}\n"
+    )
+
+
 def run_campaign(
     candidates: Iterable[Mapping[str, Any]],
     paths: CampaignPaths,
@@ -222,93 +245,33 @@ def run_campaign(
     while stop_reason is None:
         prior = _load_records(paths.ledger)
         if len(prior) >= TARGET_QUALIFYING_TRADES:
-            stop_reason = "TARGET_REACHED"
-            break
-        try:
-            candidate = next(iterator)
-        except StopIteration:
-            stop_reason = "WAITING_FOR_VALID_SIGNAL"
-            break
-        if isinstance(candidate, CampaignHalt):
-            stop_reason = candidate.reason
-            break
-        if isinstance(candidate, CampaignWait):
-            records = _load_records(paths.ledger)
-            state.update(_metrics(records))
-            state["accepted_qualifying_trades"] = len(records)
-            state["p1_status"] = _p1_status(records)
-            state["updated_utc"] = _utc_now()
-            _write_outputs(paths, state)
-            _wait_progress(candidate, state, output)
-            continue
-        if not isinstance(candidate, Mapping):
-            stop_reason = "MALFORMED_EVIDENCE_REJECTED"
-            state["rejected_records"] += 1
-            break
-        trade_id = str(candidate.get("trade_id", "")).strip()
-        if trade_id and trade_id in seen_this_run:
-            stop_reason = "DUPLICATE_TRADE_ID_REJECTED"
-            state["rejected_records"] += 1
-            break
-        realized = candidate.get("realized_pl")
-        try:
-            finite_realized = float(realized)
-        except (TypeError, ValueError):
-            finite_realized = float("nan")
-        if not math.isfinite(finite_realized):
-            stop_reason = "MALFORMED_EVIDENCE_REJECTED"
-            state["rejected_records"] += 1
-            break
+            stop_reason = "TARGEWÔ‘PPÒQ‚ˆœ™XZÂˆžN‚ˆØ[™Y]HH™^
+]\˜]ÜŠBˆ^Ù\ÝÜ]\˜][ÛŽ‚ˆÝÜÜ™X\ÛÛˆH•ÐRUS‘×Ñ“Ô—ÕSQÔÒQÓS‚ˆœ™XZÂˆYˆ\Ú[œÝ[˜ÙJØ[™Y]KØ[\ZYÛ’[
+N‚ˆÝÜÜ™X\ÛÛˆHØ[™Y]Kœ™X\ÛÛ‚ˆœ™XZÂˆYˆ\Ú[œÝ[˜ÙJØ[™Y]KØ[\ZYÛ•ØZ]
+N‚ˆ™XÛÜ™ÈHÛØYÜ™XÛÜ™Ê]Ë›YÙ\ŠBˆÝ]K\]JÛY]šXÜÊ™XÛÜ™ÊJBˆÝ]VÈ˜XØÙ\YÜ]X[YžZ[™×Ý˜Y\È—HH[Š™XÛÜ™ÊBˆÝ]VÈœWÜÝ]\È—HHÜWÜÝ]\Ê™XÛÜ™ÊBˆÝ]VÈ\]YÝ]È—HHÝ]×Û›ÝÊ
+BˆÝÜš]WÛÝ]]Ê]ËÝ]JBˆÝØZ]Ü›ÙÜ™\ÜÊØ[™Y]KÝ]KÝ]]
+BˆÛÛ[YBˆYˆ\Ú[œÝ[˜ÙJØ[™Y]KÝ[SX\šÙ]]UØZ]
+N‚ˆ™XÛÜ™ÈHÛØYÜ™XÛÜ™Ê]Ë›YÙ\ŠBˆÝ]K\]JÛY]šXÜÊ™XÛÜ™ÊJBˆÝ]VÈ˜XØÙ\YÜ]X[YžZ[™×Ý˜Y\È—HH[Š™XÛÜ™ÊBˆÝ]VÈœWÜÝ]\È—HHÜWÜÝ]\Ê™XÛÜ™ÊBˆÝ]VÈ\]YÝ]È—HHÝ]×Û›ÝÊ
+BˆÝÜš]WÛÝ]]Ê]ËÝ]JBˆÜÝ[WÝØZ]Ü›ÙÜ™\ÜÊØ[™Y]KÝ]KÝ]]
+BˆÛÛ[YBˆYˆ›Ý\Ú[œÝ[˜ÙJØ[™Y]KX\[™ÊN‚ˆÝÜÜ™X\ÛÛˆH“PS“Ô“QQÑU’QSÑWÔ‘R‘PÕQ‚ˆÝ]VÈœ™Z™XÝYÜ™XÛÜ™È—H
+ÏHBˆœ™XZÂˆ˜YWÚYHÝŠØ[™Y]K™Ù]
+˜YWÚY‹ˆŠJKœÝš\
 
-        # The candidate represents an already-closed paper trade. It is the only
-        # item inside the canonical one-candidate capture/replay boundary.
-        state["active_position"] = {"trade_id": trade_id or "pending-deterministic-id"}
-        paths.candidate.parent.mkdir(parents=True, exist_ok=True)
-        paths.candidate.write_text(json.dumps(dict(candidate), allow_nan=False), encoding="utf-8")
-        replay = run_capture_replay(
-            paths.candidate, paths.ledger, paths.replay_state, paths.replay_report,
-            paths.event_log, repository_root=repository_root,
-        )
-        state["active_position"] = None
-        state["rejected_records"] += replay["rejected_records"]
-        if replay["accepted_records"] != 1:
-            reasons = {reason for item in replay["rejections"] for reason in item["reasons"]}
-            stop_reason = "DUPLICATE_TRADE_ID_REJECTED" if "duplicate_trade_id" in reasons else "EVIDENCE_VALIDATION_FAILED"
-            break
-
-        records = _load_records(paths.ledger)
-        accepted = records[-1]
-        seen_this_run.add(str(accepted["trade_id"]))
-        metrics = _metrics(records)
-        result = {
-            "trade_number": len(records),
-            "trade_id": accepted["trade_id"],
-            "entry": accepted["entry_price"],
-            "exit": accepted["exit_price"],
-            "realized_paper_pl": accepted["realized_pl"],
-            "cumulative_paper_pl": metrics["net_pl"],
-            "win_or_loss": "WIN" if accepted["realized_pl"] > 0 else ("LOSS" if accepted["realized_pl"] < 0 else "FLAT"),
-        }
-        state.update(metrics)
-        state.update({
-            "accepted_qualifying_trades": replay["qualifying_trade_count"],
-            "current_trade_number": len(records),
-            "last_trade": result,
-            "trade_results": [*state["trade_results"], result],
-            "p1_status": replay["p1_status_after"],
-            "ready_for_p2_review": replay["ready_for_p2_review"],
-            "updated_utc": _utc_now(),
-        })
-        _write_outputs(paths, state)
-        _progress(state, output)
-        if maximum_session_loss is not None and state["net_pl"] <= -abs(maximum_session_loss):
-            stop_reason = "MAXIMUM_SESSION_LOSS_HIT"
-
-    state["campaign_status"] = "COMPLETE" if stop_reason == "TARGET_REACHED" else "STOPPED"
-    state["stop_reason"] = stop_reason
-    state["updated_utc"] = _utc_now()
-    state["completed_utc"] = state["updated_utc"]
-    state["active_position"] = None
-    _write_outputs(paths, state)
-    paths.candidate.unlink(missing_ok=True)
-    return state
+BˆYˆ˜YWÚY[™˜YWÚY[ˆÙY[—Ý\×Ü[Ž‚ˆÝÜÜ™X\ÛÛˆH‘TPÐUWÕQWÒQÔ‘R‘PÕQ‚ˆÝ]VÈœ™Z™XÝYÜ™XÛÜ™È—H
+ÏHBˆœ™XZÂˆ™X[^™YHØ[™Y]K™Ù]
+œ™X[^™YÜŠBˆžN‚ˆš[š]WÜ™X[^™YH›Ø]
+™X[^™Y
+Bˆ^Ù\
+\Q\œ›Ü‹˜[YQ\œ›ÜŠN‚ˆš[š]WÜ™X[^™YH›Ø]
+›˜[ˆŠBˆYˆ›ÝX]š\Ùš[š]Jš[š]WÜ™X[^™Y
+N‚ˆÝÜÜ™X\ÛÛˆH“PS“Ô“QQÑU’QSÑWÔ‘R‘PÕQ‚ˆÝ]VÈœ™Z™XÝYÜ™XÛÜ™È—H
+ÏHBˆœ™XZÂ‚ˆÈHØ[™Y]H™\™\Ù[È[ˆ[™XYKXÛÜÙY\\ˆ˜YKˆ]\ÈHÛ›BˆÈ][H[œÚYHHØ[›ÛšXØ[Û™KXØ[™Y]HØ\\™KÜ™\^H›Ý[™\žK‚ˆÝ]VÈ˜XÝ]™WÜÜÚ][Ûˆ—HHÈ˜YWÚYŽˆ˜YWÚYÜˆœ[™[™ËY]\›Z[š\ÝXËZYŸBˆ]Ë˜Ø[™Y]Kœ\™[›ZÙ\Š\™[ÏUYK^\ÝÛÚÏUYJBˆ]Ë˜Ø[™Y]KÜš]WÝ^
+œÛÛ‹™[\ÊXÝ
+Ø[™Y]JK[Ý×Û˜[Q˜[ÙJK[˜ÛÙ[™ÏH]‹NŠBˆ™\^HH[—ØØ\\™WÜ™\^Jˆ]Ë˜Ø[™Y]K]Ë›YÙ\‹]Ëœ™\^WÜÝ]K]Ëœ™\^WÜ™\Üˆ]Ë™]™[ÛÙË™\ÜÚ]ÜžWÜ›ÛÝ\™\ÜÚ]ÜžWÜ›ÛÝˆ
+BˆÝ]VÈ˜XÝ]™WÜÜÚ][Ûˆ—HH›Û™BˆÝ]VÈœ™Z™XÝYÜ™XÛÜ™È—H
+ÏH™\^VÈœ™Z™XÝYÜ™XÛÜ™È—BˆYˆ™\^VÈ˜XØÙ\YÜ™XÛÜ™È—HOHN‚ˆ™X\ÛÛœÈHÜ™X\ÛÛˆ›Üˆ][H[ˆ™\^VÈœ™Z™XÝ[ÛœÈ—H›Üˆ™X\ÛÛˆ[ˆ][VÈœ™X\ÛÛœÈ—_BˆÝÜÜ™X\ÛÛˆH‘TPÐUWÕQWÒQÔ‘R‘PÕQˆYˆ™\XØ]WÝ˜YWÚYˆ[ˆ™X\ÛÛœÈ[ÙH‘U’QSÑWÕSQUSÓ—ÑRSQ‚ˆœ™XZÂ‚ˆ™XÛÜ™ÈHÛØYÜ™XÛÜ™Ê]Ë›YÙ\ŠBˆXØÙ\YH™XÛÜ™ÖËLWBˆÙY[—Ý\×Ü[‹˜Y
+ÝŠXØÙ\YÈ˜YWÚY—JJBˆY]šXÜÈHÛY]šXÜÊ™XÛÜ™ÊBˆ™\Ý[HÂˆ˜YWÛ[X™\ˆŽˆ[Š™XÛÜ™ÊKˆ˜YWÚYŽˆXØÙ\YÈ˜YWÚY—Kˆ™[žHŽˆXØÙ\YÈ™[žWÜšXÙH—Kˆ™^]ŽˆXØÙ\YÈ™^]ÜšXÙH—Kˆœ™X[^™YÜ\\—ÜŽˆXØÙ\YÈœ™X[^™YÜ—Kˆ˜Ý[][]]™WÜ\\—ÜŽˆY]šXÜÖÈ›™]Ü—KˆÚ[—ÛÜ—ÛÜÜÈŽˆ•ÒSˆˆYˆXØÙ\YÈœ™X[^™YÜ—Hˆ[ÙH
+“ÔÔÈˆYˆXØÙ\YÈœ™X[^™YÜ—H[ÙH‘“UŠKˆBˆÝ]K\]JY]šXÜÊBˆÝ]K\]JÂˆ˜XØÙ\YÜ]X[YžZ[™×Ý˜Y\ÈŽˆ™\^VÈœ]X[YžZ[™×Ý˜YWØÛÝ[—Kˆ˜Ý\œ™[Ý˜YWÛ[X™\ˆŽˆ[Š™XÛÜ™ÊKˆ›\ÝÝ˜YHŽˆ™\Ý[ˆ˜YWÜ™\Ý[ÈŽˆÊœÝ]VÈ˜YWÜ™\Ý[È—K™\Ý[KˆœWÜÝ]\ÈŽˆ™\^VÈœWÜÝ]\×ØY\ˆ—Kˆœ™XYWÙ›Ü—Ü—Ü™]šY]ÈŽˆ™\^VÈœ™XYWÙ›Ü—Ü—Ü™]šY]È—Kˆ\]YÝ]ÈŽˆÝ]×Û›ÝÊ
+KˆJBˆÝÜš]WÛÝ]]Ê]ËÝ]JBˆÜ›ÙÜ™\ÜÊÝ]KÝ]]
+BˆYˆX^[][WÜÙ\ÜÚ[Û—ÛÜÜÈ\È›Ý›Û™H[™Ý]VÈ›™]Ü—HHXXœÊX^[][WÜÙ\ÜÚ[Û—ÛÜÜÊN‚ˆÝÜÜ™X\ÛÛˆH“PVSUSWÔÑTÔÒSÓ—ÓÔÔ×ÒU‚‚ˆÝ]VÈ˜Ø[\ZYÛ—ÜÝ]\È—HHÓÓTUHˆYˆÝÜÜ™X\ÛÛˆOH•T‘ÑUÔ‘PPÒQˆ[ÙH”ÕÔQ‚ˆÝ]VÈœÝÜÜ™X\ÛÛˆ—HHÝÜÜ™X\ÛÛ‚ˆÝ]VÈ\]YÝ]È—HHÝ]×Û›ÝÊ
+BˆÝ]VÈ˜ÛÛ\]YÝ]È—HHÝ]VÈ\]YÝ]È—BˆÝ]VÈ˜XÝ]™WÜÜÚ][Ûˆ—HH›Û™BˆÝÜš]WÛÝ]]Ê]ËÝ]JBˆ]Ë˜Ø[™Y]K[›[šÊZ\ÜÚ[™×ÛÚÏUYJBˆ™]\›ˆÝ]B

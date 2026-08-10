@@ -9,7 +9,7 @@ import pytest
 
 from automation.forex_engine.forex_p1_supervised_paper_campaign_v1 import (
     CampaignHalt, CampaignPaths, CampaignWait, LONG_RUN_LIMITS, MAX_OPEN_PAPER_POSITIONS,
-    SAFETY_FLAGS, TARGET_QUALIFYING_TRADES, run_campaign,
+    SAFETY_FLAGS, StaleMarketDataWait, TARGET_QUALIFYING_TRADES, run_campaign,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -88,6 +88,15 @@ def test_no_signal_cycle_waits_without_evidence_or_count(paths):
     assert not paths.ledger.exists()
     assert output.count("ACTION: WAIT_FOR_NEXT_CYCLE") == 2
     assert "CYCLE: 2/288" in output
+
+
+def test_stale_cycle_reports_bounded_wait_without_evidence(paths):
+    state, output = run([StaleMarketDataWait(2, 288, 2, 3)], paths)
+    assert state["accepted_qualifying_trades"] == 0
+    assert not paths.ledger.exists()
+    assert "MARKET_DATA: STALE" in output
+    assert "ACTION: WAIT_FOR_FRESH_MARKET_DATA" in output
+    assert "STALE_STREAK: 2/3" in output
 
 
 @pytest.mark.parametrize(("kwargs", "reason"), [

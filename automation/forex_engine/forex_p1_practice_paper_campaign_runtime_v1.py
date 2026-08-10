@@ -24,6 +24,7 @@ from automation.forex_engine.forex_p1_oanda_practice_snapshot_capture_v1 import 
 from automation.forex_engine.forex_p1_supervised_paper_campaign_v1 import (
     CampaignHalt,
     CampaignWait,
+    StaleMarketDataWait,
 )
 from automation.forex_engine.forex_p1_supervised_paper_session_v1 import (
     build_completed_trade_record,
@@ -40,6 +41,7 @@ INSTRUMENT = "EUR_USD"
 GRANULARITY = "M5"
 CANDLE_COUNT = 50
 POLL_INTERVAL_SECONDS = 300
+MAX_CONSECUTIVE_STALE_CYCLES = 3
 DEFAULT_PAPER_UNITS = 100
 SAFETY = {
     "broker_write_performed": False,
@@ -134,7 +136,7 @@ def completed_paper_records(
     owner_cancelled: Callable[[], bool] = lambda: False,
     kill_switch_active: Callable[[], bool] = lambda: False,
     risk_halt_active: Callable[[], bool] = lambda: False,
-) -> Iterator[dict[str, Any] | CampaignHalt | CampaignWait]:
+) -> Iterator[dict[str, Any] | CampaignHalt | CampaignWait | StaleMarketDataWait]:
     """Yield legitimate closed paper records, or one explicit fail-closed halt."""
     if isinstance(cycles, bool) or not isinstance(cycles, int) or cycles <= 0:
         raise ValueError("positive_cycle_count_required")
@@ -142,6 +144,7 @@ def completed_paper_records(
         raise ValueError("owner_reviewer_required")
     resolve_canonical_practice_transport(client)
 
+    consecutive_stale_cycles = 0
     for index in range(cycles):
         if owner_cancelled():
             yield CampaignHalt("OWNER_CANCELLATION")
@@ -159,9 +162,22 @@ def completed_paper_records(
             yield CampaignHalt("PRACTICE_DATA_UNAVAILABLE")
             return
         except ValueError as exc:
-            reason = "STALE_MARKET_DATA" if "stale" in str(exc).lower() else "INVALID_MARKET_DATA"
-            yield CampaignHalt(reason)
-            return
+            if "stale" not in str(exc).lower():
+                yield CampaignHalt("INVALID_MARKET_DATA")
+                return
+            consecutive_stale_cycles += 1
+            if consecutive_stale_cycles > MAX_CONSECUTIVE_STALE_CYCLES:
+                yield CampaignHalt("PERSISTENT_STALE_MARKET_DATA")
+                return
+            yield StaleMarketDataWait(
+                index + 1, cycles, consecutive_stale_cycles,
+                MAX_CONSECUTIVE_STALE_CYCLES,
+            )
+            if index + 1 < cycles:
+                sleep(POLL_INTERVAL_SECONDS)
+            continue
+
+        consecutive_stale_cycles = 0
 
         active = load_active_session(runtime_path)
         if active is None:
