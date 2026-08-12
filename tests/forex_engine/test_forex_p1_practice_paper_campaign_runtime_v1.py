@@ -43,7 +43,7 @@ def test_runtime_opens_then_closes_one_paper_position(monkeypatch, tmp_path):
         "status": "BUY", "signal_id": "canonical-signal", "strategy_id": "sprint-4",
         "stop_price": 1.099, "target_price": 1.102,
     })
-    moments = iter([NOW, NOW + timedelta(minutes=5)])
+    moments = iter([NOW, NOW, NOW + timedelta(minutes=5), NOW + timedelta(minutes=5)])
     records = list(runtime.completed_paper_records(
         client([pricing(1.1000), pricing(1.1021, NOW + timedelta(minutes=5))]),
         cycles=2, reviewer_identity="Anthony", runtime_path=tmp_path / "active.json",
@@ -74,7 +74,10 @@ def test_multiple_no_signals_can_be_followed_by_valid_paper_trade(monkeypatch, t
         {"status": "NO_SIGNAL"},
     ])
     monkeypatch.setattr(runtime, "build_signal_state", lambda *_args, **_kwargs: next(decisions))
-    moments = iter([NOW, NOW, NOW, NOW + timedelta(minutes=5)])
+    moments = iter([
+        NOW, NOW, NOW, NOW, NOW, NOW,
+        NOW + timedelta(minutes=5), NOW + timedelta(minutes=5),
+    ])
     prices = [pricing(1.1), pricing(1.1), pricing(1.1)] + [
         pricing(1.1021, NOW + timedelta(minutes=5))
     ]
@@ -90,7 +93,10 @@ def test_multiple_no_signals_can_be_followed_by_valid_paper_trade(monkeypatch, t
 
 
 def test_288_no_signal_cycles_are_bounded(monkeypatch, tmp_path):
-    monkeypatch.setattr(runtime, "_capture", lambda *_args: ({"status": "NO_SIGNAL"}, {"ask": 1.1}))
+    monkeypatch.setattr(
+        runtime, "_capture",
+        lambda *_args, **_kwargs: ({"status": "NO_SIGNAL"}, {"ask": 1.1}),
+    )
     sleeps = []
     result = list(runtime.completed_paper_records(
         client([]), cycles=288, reviewer_identity="Anthony",
@@ -118,7 +124,9 @@ def test_runtime_control_halts_are_immediate(tmp_path, callback, reason):
 def test_practice_data_failure_halts_fail_closed(monkeypatch, tmp_path):
     monkeypatch.setattr(
         runtime, "_capture",
-        lambda *_args: (_ for _ in ()).throw(runtime.OandaReadOnlyClientError("NETWORK_ERROR_SANITIZED")),
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            runtime.OandaReadOnlyClientError("NETWORK_ERROR_SANITIZED")
+        ),
     )
     result = list(runtime.completed_paper_records(
         client([]), cycles=1, reviewer_identity="Anthony",
@@ -134,6 +142,27 @@ def test_stale_or_invalid_data_halts_fail_closed(tmp_path):
         runtime_path=tmp_path / "active.json", now=lambda: stale_now, sleep=lambda _seconds: None,
     ))
     assert result == [CampaignHalt("STALE_MARKET_DATA")]
+
+
+def test_capture_uses_post_pricing_validation_time_without_weakening_freshness(monkeypatch):
+    post_pricing = NOW + timedelta(seconds=2)
+    monkeypatch.setattr(runtime, "_utc_now", lambda: post_pricing)
+
+    signal, snapshot = runtime._capture(
+        client([pricing(1.1, NOW + timedelta(seconds=1))]), NOW
+    )
+    assert signal["status"] in {"BUY", "NO_SIGNAL", "REGIME_REJECTED", "RISK_REJECTED"}
+    assert snapshot["stale_status"] == "VALID"
+
+    with pytest.raises(ValueError, match="stale_snapshot"):
+        runtime._capture(
+            client([pricing(1.1, post_pricing + timedelta(microseconds=1))]), NOW
+        )
+
+    with pytest.raises(ValueError, match="stale_snapshot"):
+        runtime._capture(
+            client([pricing(1.1, post_pricing - timedelta(seconds=301))]), NOW
+        )
 
 
 def test_runtime_is_practice_get_only_and_safety_flags_false():
