@@ -5,10 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
-import time
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -16,23 +13,12 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from automation.forex_engine.forex_p1_eurusd_m5_history_capture_v1 import (  # noqa: E402
-    build_canonical_history_artifact,
-    extract_canonical_completed_candles,
-    resolve_canonical_practice_transport,
-    validate_canonical_history_artifact,
-)
-from automation.forex_engine.forex_p1_eurusd_market_history_signal_v1 import build_signal_state  # noqa: E402
-from automation.forex_engine.forex_p1_oanda_practice_snapshot_capture_v1 import (  # noqa: E402
-    extract_sanitized_price_snapshot,
-)
 from automation.forex_engine.forex_p1_shadow_opportunity_audit_v1 import (  # noqa: E402
     PACKET_ID,
     build_audit_state,
     merge_audit_states,
     stable_json,
 )
-from automation.forex_engine.oanda_read_only_client import OandaReadOnlyClient  # noqa: E402
 
 AUTHORIZED_OUTPUT_ROOT = Path(r"C:\Dev\AIOS_TMP\P1_NEXT")
 DEFAULT_HISTORY = ROOT / ".aios/runtime/forex_market_history/EUR_USD_latest.json"
@@ -316,88 +302,6 @@ def run_offline(history_path: Path, campaign_state_path: Path, output_root: Path
     return state
 
 
-def _read_only_capture(client: OandaReadOnlyClient) -> tuple[dict[str, Any], dict[str, Any]]:
-    current = datetime.now(timezone.utc)
-    transport = resolve_canonical_practice_transport(client)
-    candle_payload = transport.candles("EUR_USD", granularity="M5", count=50)
-    candles = extract_canonical_completed_candles(candle_payload)
-    history = validate_canonical_history_artifact(
-        build_canonical_history_artifact(candles, requested_count=50), now=current
-    )
-    signal = build_signal_state(history, generated_at_utc=current.isoformat().replace("+00:00", "Z"))
-    pricing_payload = transport.pricing(("EUR_USD",))
-    snapshot = extract_sanitized_price_snapshot(
-        pricing_payload,
-        broker_call_performed=True,
-        credentials_loaded_runtime_only=True,
-        now=datetime.now(timezone.utc),
-    )
-    receipt = {
-        "status": "PASS",
-        "signal_status": signal["status"],
-        "history_last_utc": history["last_observed_at_utc"],
-        "snapshot_observed_utc": snapshot["observed_at_utc"],
-        "http_methods": ["GET"],
-        "broker_write_performed": False,
-        "practice_order_performed": False,
-        "live_trade_performed": False,
-        "money_movement_performed": False,
-        "credentials_persisted": False,
-        "credentials_included": False,
-        "account_identifier_included": False,
-        "raw_payload_included": False,
-    }
-    return history, receipt
-
-
-def run_observations(cycles: int, interval_seconds: float, output_root: Path) -> list[dict[str, Any]]:
-    if isinstance(cycles, bool) or cycles <= 0:
-        raise ValueError("positive_cycle_count_required")
-    if not math_is_nonnegative(interval_seconds):
-        raise ValueError("nonnegative_interval_required")
-    token = os.environ.get("OANDA_API_TOKEN", "")
-    account = os.environ.get("OANDA_ACCOUNT_ID", "")
-    if not token or not account:
-        raise ValueError("OANDA_RUNTIME_CREDENTIALS_REQUIRED")
-    client = OandaReadOnlyClient(api_token=token, account_id=account, environment="practice")
-    receipts = []
-    campaign = load_json(DEFAULT_CAMPAIGN_STATE) if DEFAULT_CAMPAIGN_STATE.exists() else {}
-    root = _authorized_root(output_root)
-    existing_path = root / OUTPUTS["state"]
-    previous = load_json(existing_path) if existing_path.exists() else None
-    for index in range(cycles):
-        history, receipt = _read_only_capture(client)
-        state = merge_audit_states(
-            previous, build_audit_state(history, campaign_state=campaign), campaign_state=campaign
-        )
-        state["observation_transport"] = {
-            "broker_get_performed": True,
-            "http_methods": ["GET"],
-            "broker_write_performed": False,
-            "credentials_persisted": False,
-            "credentials_included": False,
-        }
-        write_outputs(state, output_root)
-        previous = state
-        receipts.append({"observation": index + 1, **receipt})
-        if index + 1 < cycles:
-            time.sleep(interval_seconds)
-    return receipts
-
-
-def math_is_nonnegative(value: Any) -> bool:
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
-        return False
-    return math_isfinite(number) and number >= 0
-
-
-def math_isfinite(value: float) -> bool:
-    import math
-    return math.isfinite(value)
-
-
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description="P1 shadow money-following audit; never executes trades.")
     sub = result.add_subparsers(dest="command", required=True)
@@ -405,31 +309,20 @@ def parser() -> argparse.ArgumentParser:
     audit.add_argument("--history", type=Path, default=DEFAULT_HISTORY)
     audit.add_argument("--campaign-state", type=Path, default=DEFAULT_CAMPAIGN_STATE)
     audit.add_argument("--output-root", type=Path, default=AUTHORIZED_OUTPUT_ROOT)
-    observe = sub.add_parser("observe")
-    observe.add_argument("--owner-local-runtime", action="store_true")
-    observe.add_argument("--cycles", type=int, required=True)
-    observe.add_argument("--interval-seconds", type=float, default=300.0)
-    observe.add_argument("--output-root", type=Path, default=AUTHORIZED_OUTPUT_ROOT)
     return result
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
-    if args.command == "audit":
-        state = run_offline(args.history, args.campaign_state, args.output_root)
-        print(stable_json({
-            "status": "PASS", "packet_id": PACKET_ID,
-            "cycles_analyzed": state["cycles_analyzed"],
-            "shadow_candidates": state["shadow_candidates"],
-            "shadow_resolved": state["shadow_metrics"]["resolved"],
-            "money_following_status": state["money_following_status"],
-            "production_changed": False,
-        }), end="")
-        return 0
-    if not args.owner_local_runtime:
-        raise ValueError("explicit_owner_local_runtime_required")
-    receipts = run_observations(args.cycles, args.interval_seconds, args.output_root)
-    print(stable_json({"status": "PASS", "observations": receipts}), end="")
+    state = run_offline(args.history, args.campaign_state, args.output_root)
+    print(stable_json({
+        "status": "PASS", "packet_id": PACKET_ID,
+        "cycles_analyzed": state["cycles_analyzed"],
+        "shadow_candidates": state["shadow_candidates"],
+        "shadow_resolved": state["shadow_metrics"]["resolved"],
+        "money_following_status": state["money_following_status"],
+        "production_changed": False,
+    }), end="")
     return 0
 
 

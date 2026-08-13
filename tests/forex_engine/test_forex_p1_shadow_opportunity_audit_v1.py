@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import copy
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import pytest
 
 from automation.forex_engine.forex_p1_eurusd_market_history_signal_v1 import (
     FRESHNESS_SECONDS,
@@ -25,9 +28,11 @@ from automation.forex_engine.regime import (
     LOW_VOLATILITY_RANGE_PCT,
 )
 from scripts.forex_delivery.run_forex_p1_shadow_opportunity_audit_v1 import (
+    parser,
     render_audit_report,
 )
 
+ROOT = Path(__file__).resolve().parents[2]
 NOW = datetime(2026, 8, 11, 12, 0, tzinfo=timezone.utc)
 
 
@@ -221,3 +226,30 @@ def test_report_labels_separate_production_shadow_and_supertrend_without_externa
     report = render_audit_report(build_audit_state(validated(history())))
     for label in ("PRODUCTION", "SHADOW — NOT EXECUTED", "SUPERTREND — DIAGNOSTIC ONLY"):
         assert label in report
+
+
+def test_delivery_runner_has_no_broker_access_or_runtime_credential_path():
+    source = (
+        ROOT / "scripts/forex_delivery/run_forex_p1_shadow_opportunity_audit_v1.py"
+    ).read_text(encoding="utf-8")
+    forbidden_fragments = (
+        "OandaReadOnlyClient",
+        "OANDA_API_TOKEN",
+        "OANDA_ACCOUNT_ID",
+        "OANDA_RUNTIME_CREDENTIALS_REQUIRED",
+        "resolve_canonical_practice_transport",
+        "extract_sanitized_price_snapshot",
+        ".candles(",
+        ".pricing(",
+        "os.environ",
+        "run_observations",
+        "_read_only_capture",
+        'add_parser("observe")',
+        "owner-local-runtime",
+    )
+    assert all(fragment not in source for fragment in forbidden_fragments)
+
+    args = parser().parse_args(["audit"])
+    assert args.command == "audit"
+    with pytest.raises(SystemExit):
+        parser().parse_args(["observe"])
