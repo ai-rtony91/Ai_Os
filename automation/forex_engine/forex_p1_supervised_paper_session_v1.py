@@ -102,13 +102,36 @@ def _candidate(candidate: Mapping[str, Any], snapshot: Mapping[str, Any]) -> dic
         raise ValueError("NO_PAPER_TRADE_CANDIDATE")
     if candidate["instrument"] != snapshot["instrument"] or str(candidate["direction"]).upper() != "BUY":
         raise ValueError("NO_PAPER_TRADE_CANDIDATE")
+    strategy_id = str(candidate["strategy_id"]).strip()
+    strategy_name = str(candidate.get("strategy_name") or strategy_id).strip()
+    if not strategy_id or not strategy_name or strategy_name != strategy_id:
+        raise ValueError("NO_PAPER_TRADE_CANDIDATE")
+    if str(candidate.get("mode", "PAPER_ONLY")).upper() != "PAPER_ONLY":
+        raise ValueError("NO_PAPER_TRADE_CANDIDATE")
+    if candidate.get("paper_only", True) is not True:
+        raise ValueError("NO_PAPER_TRADE_CANDIDATE")
+    strategy_config = candidate.get("strategy_config")
+    if strategy_config is not None and not isinstance(strategy_config, Mapping):
+        raise ValueError("NO_PAPER_TRADE_CANDIDATE")
     units = candidate["units"]
     if isinstance(units, bool) or not isinstance(units, int) or not 0 < units <= MAX_UNITS:
         raise ValueError("NO_PAPER_TRADE_CANDIDATE")
     stop, target, risk = (_number(candidate[name], name) for name in ("stop_price", "target_price", "risk_amount"))
     if not stop < snapshot["ask"] < target or risk <= 0:
         raise ValueError("NO_PAPER_TRADE_CANDIDATE")
-    return {**dict(candidate), "stop_price": stop, "target_price": target, "risk_amount": risk}
+    normalized = {
+        **dict(candidate),
+        "strategy_id": strategy_id,
+        "strategy_name": strategy_name,
+        "mode": "PAPER_ONLY",
+        "paper_only": True,
+        "stop_price": stop,
+        "target_price": target,
+        "risk_amount": risk,
+    }
+    if strategy_config is not None:
+        normalized["strategy_config"] = dict(strategy_config)
+    return normalized
 
 
 def load_active_session(runtime_path: Path) -> dict[str, Any] | None:
@@ -125,7 +148,9 @@ def open_paper_session(snapshot: Mapping[str, Any], candidate: Mapping[str, Any]
     if not reviewer_identity.strip(): raise ValueError("owner_reviewer_required")
     session = {
         "schema": "AIOS_P1_SUPERVISED_PAPER_SESSION.v1", "status": "ACTIVE",
-        "strategy_id": item["strategy_id"], "candidate_id": item["candidate_id"],
+        "strategy_id": item["strategy_id"], "strategy_name": item["strategy_name"],
+        "mode": item["mode"], "paper_only": item["paper_only"],
+        "candidate_id": item["candidate_id"],
         "instrument": snap["instrument"], "direction": "BUY", "units": item["units"],
         "entry_timestamp": snap["observed_at_utc"], "entry_price": snap["ask"],
         "stop_price": item["stop_price"], "target_price": item["target_price"],
@@ -133,6 +158,8 @@ def open_paper_session(snapshot: Mapping[str, Any], candidate: Mapping[str, Any]
         "owner_supervision_confirmed": True, "reviewer_identity": reviewer_identity,
         "opened_as_of_utc": as_of_utc, **SAFETY_FLAGS,
     }
+    if "strategy_config" in item:
+        session["strategy_config"] = item["strategy_config"]
     active = load_active_session(runtime_path)
     if active:
         if active == session: return active
@@ -156,7 +183,11 @@ def build_completed_trade_record(session: Mapping[str, Any], closing_snapshot: M
     if _utc(review_utc) < _utc(snap["observed_at_utc"]): raise ValueError("review_precedes_exit")
     result = calculate_conservative_paper_result(session, snap, fees)
     base = {
-        "strategy_id": session["strategy_id"], "candidate_id": session["candidate_id"], "evidence_type": "paper",
+        "strategy_id": session["strategy_id"],
+        "strategy_name": session.get("strategy_name", session["strategy_id"]),
+        "mode": session.get("mode", "PAPER_ONLY"),
+        "paper_only": session.get("paper_only", True),
+        "candidate_id": session["candidate_id"], "evidence_type": "paper",
         "instrument": session["instrument"], "direction": "buy", "entry_timestamp_utc": session["entry_timestamp"],
         "exit_timestamp_utc": snap["observed_at_utc"], "entry_price": result["entry_price"], "exit_price": result["exit_price"],
         "stop_price": session["stop_price"], "target_price": session["target_price"], "quantity_or_units": session["units"],
@@ -164,6 +195,8 @@ def build_completed_trade_record(session: Mapping[str, Any], closing_snapshot: M
         "entry_rationale": session["entry_rationale"], "exit_reason": exit_reason, "evidence_source": "sanitized_supervised_paper_session",
         "reviewed_by": reviewer_identity, "review_timestamp_utc": review_utc,
     }
+    if "strategy_config" in session:
+        base["strategy_config"] = dict(session["strategy_config"])
     base["trade_id"] = "p1-session-" + hashlib.sha256(json.dumps(base, sort_keys=True).encode()).hexdigest()[:24]
     return base
 

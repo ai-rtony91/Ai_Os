@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import json
 import math
+from collections import Counter
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
-from datetime import datetime, timezone
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, TextIO
 
@@ -22,6 +23,7 @@ from automation.forex_engine.forex_profit_track_p1_strategy_evidence_v1 import (
     evaluate_strategy_evidence,
 )
 from automation.forex_engine.long_run_paper_supervisor import LONG_RUN_PAPER_MODE
+from automation.forex_engine.strategies import SUPERTREND_PULLBACK_V1
 
 VERSION = "forex_p1_supervised_paper_campaign_v1"
 TARGET_QUALIFYING_TRADES = 30
@@ -36,6 +38,22 @@ SAFETY_FLAGS = {
     "money_movement_performed": False,
     "credentials_persisted": False,
 }
+
+WAIT_FOR_NEXT_CYCLE = "WAIT_FOR_NEXT_CYCLE"
+WAIT_FOR_DATA = "WAIT_FOR_DATA"
+WAIT_ACTIONS = frozenset({WAIT_FOR_NEXT_CYCLE, WAIT_FOR_DATA})
+WAITING_FOR_NEXT_RUN = "WAITING_FOR_NEXT_RUN"
+SUPERTREND_REJECTION_REASONS = (
+    "insufficient_candles",
+    "no_supertrend_flip",
+    "trend_not_aligned",
+    "pullback_not_confirmed",
+    "volatility_filter_failed",
+    "duplicate_position_guard",
+    "data_unavailable",
+    "unknown_no_signal",
+)
+_SUPERTREND_REJECTION_REASON_SET = frozenset(SUPERTREND_REJECTION_REASONS)
 
 
 @dataclass(frozen=True)
@@ -62,10 +80,77 @@ class CampaignWait:
 
     cycle_number: int
     maximum_cycles: int
+    action: str = WAIT_FOR_NEXT_CYCLE
+    observed_at_utc: str | None = None
+    next_check_in_seconds: int | None = field(default=None, compare=False)
+    rejection_reasons: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.action not in WAIT_ACTIONS:
+            raise ValueError("unsupported_campaign_wait_action")
+        if self.action == WAIT_FOR_DATA and not self.observed_at_utc:
+            raise ValueError("wait_for_data_observed_at_utc_required")
+        if any(
+            not isinstance(reason, str)
+            or reason not in _SUPERTREND_REJECTION_REASON_SET
+            for reason in self.rejection_reasons
+        ):
+            raise ValueError("unsupported_supertrend_rejection_reason")
+        if len(set(self.rejection_reasons)) != len(self.rejection_reasons):
+            raise ValueError("duplicate_supertrend_rejection_reason")
+
+    @property
+    def rejection_reason(self) -> str | None:
+        return self.rejection_reasons[0] if self.rejection_reasons else None
 
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _format_seconds(total_seconds: int) -> str:
+    total_seconds = max(0, total_seconds)
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02}:{minutes:02}:{seconds:02}"
+
+
+def _safe_utc(value: str | Any) -> datetime | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+    except ValueError:
+        return None
+
+
+def _run_age_utc(started_utc: Any) -> str:
+    started = _safe_utc(started_utc)
+    if started is None:
+        return "UNKNOWN"
+    elapsed = datetime.now(timezone.utc) - started
+    return _format_seconds(int(max(0.0, elapsed.total_seconds())))
+
+
+def _active_position_snapshot(active_position: Any) -> str:
+    if not active_position:
+        return "NONE"
+    if isinstance(active_position, Mapping):
+        return json.dumps(active_position, sort_keys=True)
+    return str(active_position)
+
+
+def _next_wait_display(wait: CampaignWait) -> tuple[str, str]:
+    if (
+        wait.next_check_in_seconds is None
+        or wait.next_check_in_seconds <= 0
+    ):
+        return "UNKNOWN", "UNKNOWN"
+    seconds = int(wait.next_check_in_seconds)
+    eta = (datetime.now().astimezone() + timedelta(seconds=seconds)).strftime(
+        "%Y-%m-%d %H:%M:%S %Z"
+    )
+    return eta, f"{seconds} seconds"
 
 
 def _load_records(path: Path) -> list[dict[str, Any]]:
@@ -74,6 +159,25 @@ def _load_records(path: Path) -> list[dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     records = payload.get("records", []) if isinstance(payload, Mapping) else []
     return list(records) if isinstance(records, list) else []
+
+
+def _strategy_identity(record: Mapping[str, Any]) -> str:
+    return str(record.get("strategy_name") or record.get("strategy_id") or "").strip()
+
+
+def _campaign_records(
+    path: Path, qualifying_strategy_name: str | None
+) -> list[dict[str, Any]]:
+    records = _load_records(path)
+    if qualifying_strategy_name and any(
+        _strategy_identity(record) != qualifying_strategy_name for record in records
+    ):
+        raise ValueError("campaign_ledger_strategy_mismatch")
+    return records
+
+
+def _strategy_counts(records: list[Mapping[str, Any]]) -> dict[str, int]:
+    return dict(sorted(Counter(_strategy_identity(record) for record in records).items()))
 
 
 def _metrics(records: list[Mapping[str, Any]]) -> dict[str, Any]:
@@ -120,8 +224,10 @@ def _p1_status(records: list[Mapping[str, Any]]) -> str:
     return str(evaluation["strategy_evidence_status"])
 
 
-def _initial_state(started_utc: str) -> dict[str, Any]:
-    return {
+def _initial_state(
+    started_utc: str, qualifying_strategy_name: str | None
+) -> dict[str, Any]:
+    state = {
         "campaign_version": VERSION,
         "campaign_status": "RUNNING",
         "stop_reason": None,
@@ -129,8 +235,13 @@ def _initial_state(started_utc: str) -> dict[str, Any]:
         "accepted_qualifying_trades": 0,
         "rejected_records": 0,
         "current_trade_number": 0,
+        "qualifying_strategy_name": qualifying_strategy_name,
+        "strategy_qualifying_trade_counts": {},
         "active_position": None,
         "last_trade": None,
+        "data_unavailable_count": 0,
+        "last_data_unavailable_utc": None,
+        "last_action": None,
         "trade_results": [],
         **_metrics([]),
         "p1_status": "NO_EVIDENCE",
@@ -140,6 +251,156 @@ def _initial_state(started_utc: str) -> dict[str, Any]:
         "completed_utc": None,
         **SAFETY_FLAGS,
     }
+    if qualifying_strategy_name == SUPERTREND_PULLBACK_V1:
+        state.update({
+            "latest_rejection_reason": None,
+            "latest_rejection_reasons": [],
+            "rejection_reason_counts": {},
+        })
+    return state
+
+
+def _load_previous_state(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("campaign_state_invalid") from exc
+    if not isinstance(payload, Mapping):
+        raise ValueError("campaign_state_invalid")
+    return dict(payload)
+
+
+def _non_negative_count(state: Mapping[str, Any], name: str) -> int:
+    value = state.get(name, 0)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError(f"campaign_state_{name}_invalid")
+    return value
+
+
+def _restore_progress_state(
+    state: dict[str, Any],
+    previous: Mapping[str, Any],
+    qualifying_strategy_name: str | None,
+) -> None:
+    if not previous:
+        return
+    if previous.get("campaign_version") not in (None, VERSION):
+        raise ValueError("campaign_state_version_mismatch")
+    if (
+        "qualifying_strategy_name" in previous
+        and previous["qualifying_strategy_name"] != qualifying_strategy_name
+    ):
+        raise ValueError("campaign_state_strategy_mismatch")
+
+    state["rejected_records"] = _non_negative_count(previous, "rejected_records")
+    state["data_unavailable_count"] = _non_negative_count(
+        previous, "data_unavailable_count"
+    )
+    for name in (
+        "started_utc",
+        "last_data_unavailable_utc",
+        "last_action",
+    ):
+        value = previous.get(name)
+        if value is not None and not isinstance(value, str):
+            raise ValueError(f"campaign_state_{name}_invalid")
+        if value:
+            state[name] = value
+
+    if qualifying_strategy_name != SUPERTREND_PULLBACK_V1:
+        return
+
+    latest_reason = previous.get("latest_rejection_reason")
+    if latest_reason is not None and latest_reason not in _SUPERTREND_REJECTION_REASON_SET:
+        raise ValueError("campaign_state_latest_rejection_reason_invalid")
+    latest_reasons = previous.get("latest_rejection_reasons", [])
+    if (
+        not isinstance(latest_reasons, list)
+        or len(set(latest_reasons)) != len(latest_reasons)
+        or any(reason not in _SUPERTREND_REJECTION_REASON_SET for reason in latest_reasons)
+    ):
+        raise ValueError("campaign_state_latest_rejection_reasons_invalid")
+    counts = previous.get("rejection_reason_counts", {})
+    if not isinstance(counts, Mapping) or any(
+        reason not in _SUPERTREND_REJECTION_REASON_SET
+        or isinstance(count, bool)
+        or not isinstance(count, int)
+        or count < 0
+        for reason, count in counts.items()
+    ):
+        raise ValueError("campaign_state_rejection_reason_counts_invalid")
+    state["latest_rejection_reason"] = latest_reason
+    state["latest_rejection_reasons"] = list(latest_reasons)
+    state["rejection_reason_counts"] = dict(sorted(counts.items()))
+
+
+def _trade_results(records: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    cumulative_paper_pl = 0.0
+    results: list[dict[str, Any]] = []
+    for trade_number, record in enumerate(records, start=1):
+        realized_paper_pl = float(record["realized_pl"])
+        cumulative_paper_pl = round(
+            cumulative_paper_pl + realized_paper_pl,
+            8,
+        )
+        results.append({
+            "trade_number": trade_number,
+            "trade_id": record["trade_id"],
+            "strategy_name": _strategy_identity(record),
+            "entry": record["entry_price"],
+            "exit": record["exit_price"],
+            "realized_paper_pl": realized_paper_pl,
+            "cumulative_paper_pl": cumulative_paper_pl,
+            "win_or_loss": (
+                "WIN"
+                if realized_paper_pl > 0
+                else ("LOSS" if realized_paper_pl < 0 else "FLAT")
+            ),
+        })
+    return results
+
+
+def _sync_trade_evidence(
+    state: dict[str, Any], records: list[Mapping[str, Any]]
+) -> None:
+    results = _trade_results(records)
+    status = _p1_status(records)
+    state.update(_metrics(records))
+    state.update({
+        "accepted_qualifying_trades": len(records),
+        "current_trade_number": len(records),
+        "last_trade": results[-1] if results else None,
+        "trade_results": results,
+        "p1_status": status,
+        "ready_for_p2_review": status == "READY_FOR_P2_REVIEW",
+        "strategy_qualifying_trade_counts": _strategy_counts(records),
+    })
+
+
+def _mark_waiting_for_next_run(state: dict[str, Any], updated_utc: str) -> None:
+    state.update({
+        "campaign_status": WAITING_FOR_NEXT_RUN,
+        "stop_reason": None,
+        "updated_utc": updated_utc,
+        "completed_utc": None,
+        "active_position": None,
+    })
+
+
+def _mark_terminal(
+    state: dict[str, Any], stop_reason: str, updated_utc: str
+) -> None:
+    state.update({
+        "campaign_status": (
+            "COMPLETE" if stop_reason == "TARGET_REACHED" else "STOPPED"
+        ),
+        "stop_reason": stop_reason,
+        "updated_utc": updated_utc,
+        "completed_utc": updated_utc,
+        "active_position": None,
+    })
 
 
 def _write_outputs(paths: CampaignPaths, state: Mapping[str, Any]) -> None:
@@ -148,15 +409,36 @@ def _write_outputs(paths: CampaignPaths, state: Mapping[str, Any]) -> None:
         json.dumps(state, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
-    results = state["trade_results"]
+    results = list(state.get("trade_results") or [])
+    if not results:
+        ledger_records = _campaign_records(
+            paths.ledger,
+            state.get("qualifying_strategy_name"),
+        )
+        results = _trade_results(ledger_records)
     pnl_lines = [
         f"- {item['trade_id']}: {item['realized_paper_pl']} PAPER P/L"
         for item in results
     ] or ["- NONE"]
+    if state["campaign_status"] == WAITING_FOR_NEXT_RUN:
+        next_action = (
+            "Retry read-only Practice data in the next owner-bounded campaign run."
+            if state["last_action"] == WAIT_FOR_DATA
+            else "Start the next owner-bounded paper/demo campaign run when ready."
+        )
+    elif state["campaign_status"] == "RUNNING":
+        next_action = "The current owner-bounded paper/demo campaign is active."
+    elif state["stop_reason"] == "TARGET_REACHED":
+        next_action = "Human owner may review P1 evidence; no promotion is automatic."
+    else:
+        next_action = "Review the stop reason before a new owner-started campaign."
     report = [
         "# AIOS Forex P1 30-Trade Paper Campaign V1", "",
+        f"- CAMPAIGN_STATUS: {state['campaign_status']}",
         f"- TARGET: {state['target_qualifying_trades']}",
         f"- ACCEPTED: {state['accepted_qualifying_trades']}",
+        f"- QUALIFYING_STRATEGY: {state['qualifying_strategy_name'] or 'ANY'}",
+        f"- STRATEGY_COUNTS: {json.dumps(state['strategy_qualifying_trade_counts'], sort_keys=True)}",
         f"- REJECTED: {state['rejected_records']}",
         f"- CUMULATIVE_PAPER_PNL: {state['net_pl']}",
         f"- PROFIT_FACTOR: {state['profit_factor']}",
@@ -164,8 +446,12 @@ def _write_outputs(paths: CampaignPaths, state: Mapping[str, Any]) -> None:
         f"- LOSS_STREAK: {state['consecutive_losses']}",
         f"- EXPECTANCY: {state['expectancy']}",
         f"- P1_STATUS: {state['p1_status']}",
-        f"- STOP_REASON: {state['stop_reason']}",
-        "- NEXT_ACTION: Supply a fresh legitimate paper signal in a new owner-started campaign." if state["stop_reason"] != "TARGET_REACHED" else "- NEXT_ACTION: Human owner may review P1 evidence; no promotion is automatic.",
+        f"- DATA_UNAVAILABLE_COUNT: {state['data_unavailable_count']}",
+        f"- LAST_DATA_UNAVAILABLE_UTC: {state['last_data_unavailable_utc'] or 'NONE'}",
+        f"- LAST_ACTION: {state['last_action'] or 'NONE'}",
+        f"- STOP_REASON: {state['stop_reason'] or 'NONE'}",
+        f"- COMPLETED_UTC: {state['completed_utc'] or 'NONE'}",
+        f"- NEXT_ACTION: {next_action}",
         "", "## PAPER_PNL_BY_TRADE", "", *pnl_lines, "",
         "All results are local PAPER P/L. No broker order, live trade, or money movement occurred.", "",
     ]
@@ -187,10 +473,22 @@ def _progress(state: Mapping[str, Any], stream: TextIO) -> None:
 
 
 def _wait_progress(wait: CampaignWait, state: Mapping[str, Any], stream: TextIO) -> None:
+    run_age = _run_age_utc(state.get("started_utc"))
+    next_eta, next_in = _next_wait_display(wait)
+    rejection_line = (
+        f"REJECTION REASON: {wait.rejection_reason}\n"
+        if wait.rejection_reason
+        else ""
+    )
     stream.write(
+        f"RUN AGE: {run_age}\n"
         f"CYCLE: {wait.cycle_number}/{wait.maximum_cycles}\n"
+        f"NEXT CHECK ETA: {next_eta}\n"
+        f"NEXT CHECK IN: {next_in}\n"
         "SIGNAL: NONE\n"
-        "ACTION: WAIT_FOR_NEXT_CYCLE\n"
+        f"ACTION: {wait.action}\n"
+        f"{rejection_line}"
+        f"ACTIVE POSITION: {_active_position_snapshot(state['active_position'])}\n"
         f"QUALIFYING: {state['accepted_qualifying_trades']}/30\n"
         f"CUMULATIVE PAPER P/L: {state['net_pl']}\n"
         f"P1 STATUS: {state['p1_status']}\n"
@@ -206,10 +504,20 @@ def run_campaign(
     kill_switch_active: bool = False,
     risk_halt_active: bool = False,
     maximum_session_loss: float | None = None,
+    qualifying_strategy_name: str | None = None,
 ) -> dict[str, Any]:
     """Capture up to 30 already-closed paper candidates, sequentially and fail closed."""
     started = _utc_now()
-    state = _initial_state(started)
+    if qualifying_strategy_name is not None:
+        qualifying_strategy_name = str(qualifying_strategy_name).strip()
+        if not qualifying_strategy_name:
+            raise ValueError("qualifying_strategy_name_required")
+    previous_state_exists = paths.campaign_state.exists()
+    previous_state = _load_previous_state(paths.campaign_state)
+    prior_records = _campaign_records(paths.ledger, qualifying_strategy_name)
+    state = _initial_state(started, qualifying_strategy_name)
+    _restore_progress_state(state, previous_state, qualifying_strategy_name)
+    _sync_trade_evidence(state, prior_records)
     stop_reason: str | None = None
     seen_this_run: set[str] = set()
 
@@ -218,31 +526,66 @@ def run_campaign(
     elif risk_halt_active:
         stop_reason = "RISK_HALT"
 
+    if (
+        stop_reason is None
+        and len(prior_records) < TARGET_QUALIFYING_TRADES
+        and (previous_state_exists or prior_records)
+    ):
+        _mark_waiting_for_next_run(state, started)
+        _write_outputs(paths, state)
+
     iterator = iter(candidates)
     while stop_reason is None:
-        prior = _load_records(paths.ledger)
+        prior = _campaign_records(paths.ledger, qualifying_strategy_name)
         if len(prior) >= TARGET_QUALIFYING_TRADES:
             stop_reason = "TARGET_REACHED"
             break
         try:
             candidate = next(iterator)
         except StopIteration:
-            stop_reason = "WAITING_FOR_VALID_SIGNAL"
+            break
+        except KeyboardInterrupt:
+            stop_reason = "OWNER_CANCELLATION"
             break
         if isinstance(candidate, CampaignHalt):
             stop_reason = candidate.reason
             break
         if isinstance(candidate, CampaignWait):
-            records = _load_records(paths.ledger)
-            state.update(_metrics(records))
-            state["accepted_qualifying_trades"] = len(records)
-            state["p1_status"] = _p1_status(records)
-            state["updated_utc"] = _utc_now()
+            records = _campaign_records(paths.ledger, qualifying_strategy_name)
+            _sync_trade_evidence(state, records)
+            state["last_action"] = candidate.action
+            if candidate.rejection_reasons:
+                if qualifying_strategy_name != SUPERTREND_PULLBACK_V1:
+                    raise ValueError(
+                        "supertrend_rejection_reason_requires_supertrend_campaign"
+                    )
+                counts = dict(state["rejection_reason_counts"])
+                for reason in candidate.rejection_reasons:
+                    counts[reason] = counts.get(reason, 0) + 1
+                state["latest_rejection_reason"] = candidate.rejection_reason
+                state["latest_rejection_reasons"] = list(
+                    candidate.rejection_reasons
+                )
+                state["rejection_reason_counts"] = dict(sorted(counts.items()))
+            updated_utc = _utc_now()
+            if candidate.action == WAIT_FOR_DATA:
+                state["data_unavailable_count"] += 1
+                state["last_data_unavailable_utc"] = (
+                    candidate.observed_at_utc or updated_utc
+                )
+            _mark_waiting_for_next_run(state, updated_utc)
             _write_outputs(paths, state)
             _wait_progress(candidate, state, output)
             continue
         if not isinstance(candidate, Mapping):
             stop_reason = "MALFORMED_EVIDENCE_REJECTED"
+            state["rejected_records"] += 1
+            break
+        if (
+            qualifying_strategy_name
+            and _strategy_identity(candidate) != qualifying_strategy_name
+        ):
+            stop_reason = "STRATEGY_MISMATCH_REJECTED"
             state["rejected_records"] += 1
             break
         trade_id = str(candidate.get("trade_id", "")).strip()
@@ -276,39 +619,30 @@ def run_campaign(
             stop_reason = "DUPLICATE_TRADE_ID_REJECTED" if "duplicate_trade_id" in reasons else "EVIDENCE_VALIDATION_FAILED"
             break
 
-        records = _load_records(paths.ledger)
+        records = _campaign_records(paths.ledger, qualifying_strategy_name)
         accepted = records[-1]
         seen_this_run.add(str(accepted["trade_id"]))
-        metrics = _metrics(records)
-        result = {
-            "trade_number": len(records),
-            "trade_id": accepted["trade_id"],
-            "entry": accepted["entry_price"],
-            "exit": accepted["exit_price"],
-            "realized_paper_pl": accepted["realized_pl"],
-            "cumulative_paper_pl": metrics["net_pl"],
-            "win_or_loss": "WIN" if accepted["realized_pl"] > 0 else ("LOSS" if accepted["realized_pl"] < 0 else "FLAT"),
-        }
-        state.update(metrics)
-        state.update({
-            "accepted_qualifying_trades": replay["qualifying_trade_count"],
-            "current_trade_number": len(records),
-            "last_trade": result,
-            "trade_results": [*state["trade_results"], result],
-            "p1_status": replay["p1_status_after"],
-            "ready_for_p2_review": replay["ready_for_p2_review"],
-            "updated_utc": _utc_now(),
-        })
-        _write_outputs(paths, state)
-        _progress(state, output)
+        _sync_trade_evidence(state, records)
+        state["last_action"] = "PAPER_TRADE_RECORDED"
         if maximum_session_loss is not None and state["net_pl"] <= -abs(maximum_session_loss):
             stop_reason = "MAXIMUM_SESSION_LOSS_HIT"
+        elif len(records) >= TARGET_QUALIFYING_TRADES:
+            stop_reason = "TARGET_REACHED"
+        updated_utc = _utc_now()
+        if stop_reason is None:
+            _mark_waiting_for_next_run(state, updated_utc)
+        else:
+            _mark_terminal(state, stop_reason, updated_utc)
+        _write_outputs(paths, state)
+        _progress(state, output)
 
-    state["campaign_status"] = "COMPLETE" if stop_reason == "TARGET_REACHED" else "STOPPED"
-    state["stop_reason"] = stop_reason
-    state["updated_utc"] = _utc_now()
-    state["completed_utc"] = state["updated_utc"]
-    state["active_position"] = None
+    final_records = _campaign_records(paths.ledger, qualifying_strategy_name)
+    _sync_trade_evidence(state, final_records)
+    final_updated_utc = _utc_now()
+    if stop_reason is None:
+        _mark_waiting_for_next_run(state, final_updated_utc)
+    else:
+        _mark_terminal(state, stop_reason, final_updated_utc)
     _write_outputs(paths, state)
     paths.candidate.unlink(missing_ok=True)
     return state

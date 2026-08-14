@@ -22,6 +22,9 @@ REQUIRED_FIELDS = (
     "risk_amount", "exit_reason", "entry_rationale", "evidence_source",
     "reviewed_by", "review_timestamp_utc",
 )
+OPTIONAL_IDENTITY_FIELDS = (
+    "strategy_name", "mode", "paper_only", "strategy_config",
+)
 NUMERIC_FIELDS = (
     "entry_price", "exit_price", "stop_price", "target_price",
     "quantity_or_units", "realized_pl", "fees", "risk_amount",
@@ -109,6 +112,23 @@ def _validate(raw: Any, index: int, known_ids: set[str]) -> tuple[dict[str, Any]
     if evidence_type and evidence_type not in ALLOWED_EVIDENCE_TYPES:
         reasons.append("unsupported_evidence_type")
     normalized = dict(raw)
+    strategy_id = str(raw.get("strategy_id", "")).strip()
+    strategy_name = str(raw.get("strategy_name") or strategy_id).strip()
+    if strategy_id and strategy_name != strategy_id:
+        reasons.append("strategy_identity_mismatch")
+    normalized["strategy_name"] = strategy_name
+    if "mode" in raw:
+        mode = str(raw.get("mode", "")).strip().upper()
+        if mode != "PAPER_ONLY":
+            reasons.append("paper_only_mode_required")
+        normalized["mode"] = mode
+    if "paper_only" in raw and raw.get("paper_only") is not True:
+        reasons.append("paper_only_true_required")
+    if "strategy_config" in raw:
+        if not isinstance(raw.get("strategy_config"), Mapping):
+            reasons.append("invalid_strategy_config")
+        else:
+            normalized["strategy_config"] = dict(raw["strategy_config"])
     for field in NUMERIC_FIELDS:
         if field not in missing:
             number = _finite(raw.get(field))
@@ -133,7 +153,11 @@ def _validate(raw: Any, index: int, known_ids: set[str]) -> tuple[dict[str, Any]
         return None, {"record_index": index, "trade_id": trade_id or None, "reasons": reasons}
     normalized["trade_id"] = trade_id
     normalized["evidence_type"] = evidence_type
-    return {field: normalized[field] for field in REQUIRED_FIELDS}, None
+    return {
+        field: normalized[field]
+        for field in (*REQUIRED_FIELDS, *OPTIONAL_IDENTITY_FIELDS)
+        if field in normalized
+    }, None
 
 
 def _evaluator_records(records: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
