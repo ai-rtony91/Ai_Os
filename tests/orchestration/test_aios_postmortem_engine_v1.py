@@ -3,7 +3,7 @@ from copy import deepcopy
 import pytest
 from automation.orchestration.postmortem.aios_postmortem_engine_v1 import (
     DuplicateEventError, PatternMemory, PostmortemEngine, ValidationError,
-    build_hypothesis, canonical_json, classify, learn, transition, validate_event,
+    build_hypothesis, canonical_json, classify, learn, transition, validate_event, validate_pattern,
 )
 
 def event(eid="event-1", iid="incident-1"):
@@ -85,3 +85,13 @@ def test_deterministic_machine_output_and_end_to_end():
     closed=engine.close(verified["state"])
     assert canonical_json(lesson)==canonical_json(lesson)
     assert plan["durability_state"]=="AT_RISK" and closed["state"]=="CLOSED"
+
+def test_pattern_schema_is_closed_and_count_is_consistent():
+    pattern=PatternMemory().observe(event())
+    assert validate_pattern(pattern) == pattern
+    pattern["independent_incident_count"]=2
+    with pytest.raises(ValidationError): validate_pattern(pattern)
+
+def test_pattern_cannot_promote_one_incident():
+    pattern=PatternMemory().observe(event()); pattern["promotion_eligible"]=True
+    with pytest.raises(ValidationError): validate_pattern(pattern)

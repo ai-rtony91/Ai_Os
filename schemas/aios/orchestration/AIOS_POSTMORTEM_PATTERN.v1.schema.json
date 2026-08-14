@@ -44,6 +44,7 @@
     "human_owner_review_required",
     "authority"
   ],
+  "description": "Independent-incident recurrence evidence with fail-closed promotion metadata.",
   "title": "AIOS Post-Mortem Pattern v1",
   "type": "object"
 }

@@ -1,7 +1,7 @@
 {
   "authority": "OPERATIONAL_EVIDENCE_ONLY",
-  "focused_tests": {"passed": 11, "failed": 0, "skipped": 0},
-  "packet_id": "PKT-EAST-POSTMORTEM-001",
+  "focused_tests": {"passed": 13, "failed": 0, "skipped": 0},
+  "packet_id": "PKT-EAST-POSTMORTEM-REBUILD-WORK-006",
   "regression_tests": {"passed": 35, "failed": 0, "skipped": 0},
   "schema_version": "1.0",
   "status": "PASS"

@@ -118,6 +118,28 @@ def validate_event(event: Mapping[str, Any], seen_event_ids: set[str] | None = N
     if seen_event_ids is not None: seen_event_ids.add(event["event_id"])
     return result
 
+def validate_pattern(pattern: Mapping[str, Any]) -> dict[str, Any]:
+    """Validate the engine's closed, evidence-only pattern record."""
+    required = {"schema_version", "signature", "incident_ids", "independent_incident_count",
+                "duplicate_suppressed", "promotion_eligible", "human_owner_review_required", "authority"}
+    if not isinstance(pattern, Mapping) or set(pattern) != required:
+        raise ValidationError("pattern fields do not match the closed schema")
+    _walk(pattern)
+    incidents = pattern["incident_ids"]
+    if pattern["schema_version"] != VERSION or pattern["authority"] != "OPERATIONAL_EVIDENCE_ONLY":
+        raise ValidationError("unsupported pattern identity")
+    if not isinstance(pattern["signature"], str) or not pattern["signature"]:
+        raise ValidationError("invalid pattern signature")
+    if not isinstance(incidents, list) or len(incidents) != len(set(incidents)):
+        raise ValidationError("incident IDs must be a unique array")
+    if pattern["independent_incident_count"] != len(incidents):
+        raise ValidationError("incident count contradicts incident IDs")
+    for field in ("duplicate_suppressed", "promotion_eligible", "human_owner_review_required"):
+        if type(pattern[field]) is not bool: raise ValidationError(f"{field} must be boolean")
+    if pattern["promotion_eligible"] and len(incidents) < 2:
+        raise ValidationError("promotion requires two independent incidents")
+    return deepcopy(dict(pattern))
+
 def classify(facts: Mapping[str, Any]) -> dict[str, str]:
     rules = (
         ("corrupt_evidence", "CORRUPT_STATE"), ("duplicate_apply", "DUPLICATE_APPLY"),
@@ -152,10 +174,10 @@ class PatternMemory:
     def pattern(self, signature: str, *, safety_critical: bool = False, duplicate: bool = False) -> dict[str, Any]:
         matches = sorted(i for i, x in self.incidents.items() if x["signature"] == signature)
         eligible = len(matches) >= 2 and not safety_critical
-        return {"schema_version": VERSION, "signature": signature, "incident_ids": matches,
+        return validate_pattern({"schema_version": VERSION, "signature": signature, "incident_ids": matches,
                 "independent_incident_count": len(matches), "duplicate_suppressed": duplicate,
                 "promotion_eligible": eligible, "human_owner_review_required": safety_critical or eligible,
-                "authority": "OPERATIONAL_EVIDENCE_ONLY"}
+                "authority": "OPERATIONAL_EVIDENCE_ONLY"})
 
 def build_hypothesis(hypothesis_id: str, proposed_cause: str, supporting: Iterable[str], contradicting: Iterable[str], proposed_test: str, test_status: str) -> dict[str, Any]:
     support, contradict = sorted(set(supporting)), sorted(set(contradicting))

@@ -9,3 +9,5 @@ It does **not** create governance authority or mutate Git, queues, workers, appr
 Run the module with `analyze`, `classify`, `learn`, `plan`, `verify`, or `close` and a JSON input file. Commands are read-only unless `--output` is supplied. Output is restricted to `Reports/orchestration/postmortem/` and is canonical JSON.
 
 Durability is one of `REMOTE_VERIFIED`, `USER_VISIBLE_CAPSULE_VERIFIED`, or `AT_RISK`. A local-only commit is always `AT_RISK`; it is never described as remotely recoverable.
+
+Both event and pattern objects are validated as closed records. Pattern validation also checks that the declared independent-incident count equals the unique incident IDs and rejects promotion based on a single incident.

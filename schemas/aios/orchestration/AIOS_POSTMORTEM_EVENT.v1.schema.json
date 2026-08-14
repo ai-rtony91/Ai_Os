@@ -200,6 +200,7 @@
     "promotion_status",
     "next_safe_action"
   ],
+  "description": "Closed, sanitized operational-evidence event; never governance authority.",
   "title": "AIOS Post-Mortem Event v1",
   "type": "object"
 }
