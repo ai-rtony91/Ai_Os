@@ -62,6 +62,25 @@ def test_accepts_qualifying_sanitized_types(paths, evidence_type):
     assert result["evidence_type_counts"] == {evidence_type: 1}
 
 
+def test_preserves_supertrend_identity_and_paper_only_metadata(paths):
+    record = {
+        **trade(),
+        "strategy_id": "supertrend_pullback_v1",
+        "strategy_name": "supertrend_pullback_v1",
+        "mode": "PAPER_ONLY",
+        "paper_only": True,
+        "strategy_config": {"atr_period": 3, "multiplier": 2.0},
+    }
+    result = run(paths, [record])
+    ledger = json.loads(paths[1].read_text(encoding="utf-8"))
+    accepted = ledger["records"][0]
+    assert result["accepted_records"] == 1
+    assert accepted["strategy_name"] == "supertrend_pullback_v1"
+    assert accepted["mode"] == "PAPER_ONLY"
+    assert accepted["paper_only"] is True
+    assert accepted["strategy_config"] == {"atr_period": 3, "multiplier": 2.0}
+
+
 @pytest.mark.parametrize("evidence_type", ["fixture", "synthetic", "live", "broker_raw"])
 def test_rejects_nonqualifying_evidence_types(paths, evidence_type):
     result = run(paths, [trade(evidence_type=evidence_type)])
@@ -102,6 +121,9 @@ def test_missing_field_is_not_inferred(paths):
         ({"order_id": "private"}, "secret_or_private_identifier_rejected"),
         ({"raw_broker_payload": {}}, "raw_broker_payload_rejected"),
         ({"entry_rationale": "password=do-not-store"}, "secret_or_private_identifier_rejected"),
+        ({"strategy_name": "different"}, "strategy_identity_mismatch"),
+        ({"mode": "LIVE"}, "paper_only_mode_required"),
+        ({"paper_only": False}, "paper_only_true_required"),
     ],
 )
 def test_fail_closed_rejections(paths, mutation, reason):

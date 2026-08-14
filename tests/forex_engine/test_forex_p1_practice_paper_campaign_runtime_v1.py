@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import os
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -43,7 +45,9 @@ def test_runtime_opens_then_closes_one_paper_position(monkeypatch, tmp_path):
         "status": "BUY", "signal_id": "canonical-signal", "strategy_id": "sprint-4",
         "stop_price": 1.099, "target_price": 1.102,
     })
-    moments = iter([NOW, NOW + timedelta(minutes=5)])
+    moments = iter([
+        NOW, NOW, NOW + timedelta(minutes=5), NOW + timedelta(minutes=5),
+    ])
     records = list(runtime.completed_paper_records(
         client([pricing(1.1000), pricing(1.1021, NOW + timedelta(minutes=5))]),
         cycles=2, reviewer_identity="Anthony", runtime_path=tmp_path / "active.json",
@@ -53,7 +57,9 @@ def test_runtime_opens_then_closes_one_paper_position(monkeypatch, tmp_path):
     assert records[0]["evidence_type"] == "paper"
     assert records[0]["realized_pl"] > 0
     assert isinstance(records[-1], CampaignHalt)
-    assert not (tmp_path / "active.json").exists()
+    closed = json.loads((tmp_path / "active.json").read_text(encoding="utf-8"))
+    assert closed["status"] == "CLOSED"
+    assert closed["closed_reason"] == "paper_target"
 
 
 def test_no_signal_stops_without_manufacturing_trade(monkeypatch, tmp_path):
@@ -74,7 +80,10 @@ def test_multiple_no_signals_can_be_followed_by_valid_paper_trade(monkeypatch, t
         {"status": "NO_SIGNAL"},
     ])
     monkeypatch.setattr(runtime, "build_signal_state", lambda *_args, **_kwargs: next(decisions))
-    moments = iter([NOW, NOW, NOW, NOW + timedelta(minutes=5)])
+    moments = iter([
+        NOW, NOW, NOW, NOW, NOW, NOW,
+        NOW + timedelta(minutes=5), NOW + timedelta(minutes=5),
+    ])
     prices = [pricing(1.1), pricing(1.1), pricing(1.1)] + [
         pricing(1.1021, NOW + timedelta(minutes=5))
     ]
@@ -90,7 +99,11 @@ def test_multiple_no_signals_can_be_followed_by_valid_paper_trade(monkeypatch, t
 
 
 def test_288_no_signal_cycles_are_bounded(monkeypatch, tmp_path):
-    monkeypatch.setattr(runtime, "_capture", lambda *_args: ({"status": "NO_SIGNAL"}, {"ask": 1.1}))
+    def no_signal_capture(*_args, **kwargs):
+        assert callable(kwargs.get("pricing_now"))
+        return {"status": "NO_SIGNAL"}, {"ask": 1.1}
+
+    monkeypatch.setattr(runtime, "_capture", no_signal_capture)
     sleeps = []
     result = list(runtime.completed_paper_records(
         client([]), cycles=288, reviewer_identity="Anthony",
@@ -116,15 +129,26 @@ def test_runtime_control_halts_are_immediate(tmp_path, callback, reason):
 
 
 def test_practice_data_failure_halts_fail_closed(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        runtime, "_capture",
-        lambda *_args: (_ for _ in ()).throw(runtime.OandaReadOnlyClientError("NETWORK_ERROR_SANITIZED")),
-    )
+    def unavailable_capture(*_args, **kwargs):
+        assert callable(kwargs.get("pricing_now"))
+        raise runtime.OandaReadOnlyClientError("NETWORK_ERROR_SANITIZED")
+
+    monkeypatch.setattr(runtime, "_capture", unavailable_capture)
     result = list(runtime.completed_paper_records(
         client([]), cycles=1, reviewer_identity="Anthony",
-        runtime_path=tmp_path / "active.json", sleep=lambda _seconds: None,
+        runtime_path=tmp_path / "active.json", now=lambda: NOW,
+        sleep=lambda _seconds: None,
     ))
-    assert result == [CampaignHalt("PRACTICE_DATA_UNAVAILABLE")]
+    waits = [item for item in result if isinstance(item, CampaignWait)]
+    assert waits == [CampaignWait(
+        1,
+        1,
+        action=runtime.WAIT_FOR_DATA,
+        observed_at_utc=runtime._stamp(NOW),
+        rejection_reasons=("data_unavailable",),
+    )]
+    assert result[-1] == CampaignHalt("OWNER_SESSION_CYCLE_LIMIT")
+    assert not any(isinstance(item, dict) for item in result)
 
 
 def test_stale_or_invalid_data_halts_fail_closed(tmp_path):
@@ -150,3 +174,81 @@ def test_live_transport_and_unbounded_cycles_are_rejected(tmp_path):
         list(runtime.completed_paper_records(live, cycles=1, reviewer_identity="Anthony", runtime_path=tmp_path/"x", sleep=lambda _: None))
     with pytest.raises(ValueError, match="positive_cycle"):
         list(runtime.completed_paper_records(client([]), cycles=0, reviewer_identity="Anthony", runtime_path=tmp_path/"x", sleep=lambda _: None))
+
+
+def test_resolve_signal_source_preserves_default_source():
+    assert runtime.resolve_signal_source() == runtime.SPRINT_4_SIGNAL_SOURCE
+
+
+def test_resolve_signal_source_requires_supertrend_gate_for_supertrend_source():
+    with pytest.raises(ValueError, match="supertrend_paper_demo_only_confirmation_required"):
+        runtime.resolve_signal_source(runtime.SUPERTREND_SIGNAL_SOURCE)
+
+
+def test_resolve_signal_source_accepts_supertrend_with_demo_gate():
+    assert runtime.resolve_signal_source(
+        runtime.SUPERTREND_SIGNAL_SOURCE,
+        supertrend_paper_demo_only=True,
+    ) == runtime.SUPERTREND_SIGNAL_SOURCE
+
+
+def test_resolve_signal_source_rejects_unknown_source():
+    with pytest.raises(ValueError, match="unsupported_signal_source"):
+        runtime.resolve_signal_source("invalid")
+
+
+def test_supertrend_lock_acquisition_and_release_in_tmp_directory(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    first = NOW
+    assert runtime._read_lock_record(lock_path) is None
+    assert runtime._acquire_supertrend_lock(lock_path, now=first) is True
+    assert lock_path.exists()
+    try:
+        record = runtime._read_lock_record(lock_path)
+        assert record is not None
+        assert record["status"] == "ACTIVE"
+        assert record["pid"] == os.getpid()
+    finally:
+        runtime._release_supertrend_lock(lock_path)
+    assert not lock_path.exists()
+
+
+def test_supertrend_lock_touches_heartbeat_for_owned_lock(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    assert runtime._acquire_supertrend_lock(lock_path, now=NOW) is True
+    try:
+        runtime._touch_supertrend_lock(lock_path, now=NOW + timedelta(minutes=1))
+        record = runtime._read_lock_record(lock_path)
+        assert record is not None
+        assert record["heartbeat_at_utc"] == runtime._stamp(NOW + timedelta(minutes=1))
+    finally:
+        runtime._release_supertrend_lock(lock_path)
+
+
+def test_supertrend_lock_release_only_removes_owned_lock(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    try:
+        runtime._write_lock_record(
+            lock_path,
+            runtime._supertrend_lock_record(
+                heartbeat_utc=runtime._stamp(NOW),
+                pid=999,
+                owner="non_owner_runtime",
+            ),
+        )
+        runtime._release_supertrend_lock(lock_path)
+        assert lock_path.exists()
+    finally:
+        lock_path.unlink(missing_ok=True)
+
+
+def test_supertrend_lock_double_acquire_returns_false_for_active_lock(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    assert runtime._acquire_supertrend_lock(lock_path, now=NOW) is True
+    try:
+        original_record = runtime._read_lock_record(lock_path)
+        assert original_record is not None
+        assert runtime._acquire_supertrend_lock(lock_path, now=NOW) is False
+        assert runtime._read_lock_record(lock_path) == original_record
+    finally:
+        runtime._release_supertrend_lock(lock_path)
