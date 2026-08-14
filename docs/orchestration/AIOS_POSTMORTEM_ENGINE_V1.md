@@ -11,3 +11,7 @@ Run the module with `analyze`, `classify`, `learn`, `plan`, `verify`, or `close`
 Durability is one of `REMOTE_VERIFIED`, `USER_VISIBLE_CAPSULE_VERIFIED`, or `AT_RISK`. A local-only commit is always `AT_RISK`; it is never described as remotely recoverable.
 
 Both event and pattern objects are validated as closed records. Pattern validation also checks that the declared independent-incident count equals the unique incident IDs and rejects promotion based on a single incident.
+
+## Trade analytics
+
+The evidence-only trade analyzer validates typed provenance, admits only proven closed trades, preserves unknown optional facts as null, and calculates deterministic PnL statistics. Pattern hooks require their named metrics and never infer cause from PnL alone. Experiment recommendations cite supporting trades and evidence, remain blocked below a configurable threshold, and have no runtime authority. Progress keeps software, evidence, analysis, and release readiness separate; missing campaign evidence is `NOT_PROVEN`.

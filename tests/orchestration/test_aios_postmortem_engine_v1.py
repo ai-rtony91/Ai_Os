@@ -3,7 +3,9 @@ from copy import deepcopy
 import pytest
 from automation.orchestration.postmortem.aios_postmortem_engine_v1 import (
     DuplicateEventError, PatternMemory, PostmortemEngine, ValidationError,
-    build_hypothesis, canonical_json, classify, learn, transition, validate_event, validate_pattern,
+    analyze_trades, build_hypothesis, canonical_json, classify, classify_trade_patterns,
+    learn, performance_statistics, progress_accounting, qualify_trades,
+    recommend_experiments, transition, validate_event, validate_pattern,
 )
 
 def event(eid="event-1", iid="incident-1"):
@@ -95,3 +97,109 @@ def test_pattern_schema_is_closed_and_count_is_consistent():
 def test_pattern_cannot_promote_one_incident():
     pattern=PatternMemory().observe(event()); pattern["promotion_eligible"]=True
     with pytest.raises(ValidationError): validate_pattern(pattern)
+
+def typed_evidence(kind="trade_execution", ref="exec:1"):
+    return {"evidence_type":kind,"reference":ref,"evidence_hash":"b"*64,"source":"test"}
+
+def trade(trade_id="t1", pnl=10.0, status="CLOSED", metrics=None, **overrides):
+    value={"trade_id":trade_id,"status":status,"instrument":"EUR_USD","side":"BUY",
+      "entry_timestamp":"2026-01-01T00:00:00Z","exit_timestamp":"2026-01-01T00:05:00Z",
+      "entry_price":1.1,"exit_price":1.2,"realized_pnl":pnl,"fees":1.0,
+      "evidence":[typed_evidence()],"metrics":metrics or {}}
+    value.update(overrides); return value
+
+def test_zero_trades_and_unproven_progress():
+    result=analyze_trades([])
+    assert result["summary"]["total_trades"]==0 and result["summary"]["win_rate"] is None
+    assert result["progress"]["qualifying_trades"]=="NOT_PROVEN"
+
+def test_winner_loser_mixed_and_breakeven_statistics():
+    accepted=qualify_trades([trade("w",11),trade("l",-4),trade("b",1)])["qualifying"]
+    stats=performance_statistics(accepted)
+    assert (stats["wins"],stats["losses"],stats["breakeven"])==(1,1,1)
+    assert stats["net_pnl"]==5 and stats["expectancy"]==pytest.approx(5/3)
+
+def test_duplicate_open_malformed_and_unproven_rejected():
+    records=[trade("d"),trade("d"),trade("o",status="OPEN"),trade("u",status="NOT_PROVEN"),{"trade_id":"bad"}]
+    result=qualify_trades(records)
+    assert [x["reason"] for x in result["rejected"]]==["DUPLICATE","OPEN","UNPROVEN_CLOSED_STATE","MALFORMED"]
+
+def test_missing_execution_evidence_rejected():
+    result=qualify_trades([trade(evidence=[typed_evidence("signal")])])
+    assert result["rejected"][0]["reason"]=="MISSING_REQUIRED_EVIDENCE"
+
+def test_unsupported_evidence_type_rejected():
+    result=qualify_trades([trade(evidence=[typed_evidence("broker_claim")])])
+    assert result["rejected"][0]["reason"]=="MALFORMED"
+
+def test_missing_optional_fields_remain_null():
+    value=qualify_trades([trade()])["qualifying"][0]
+    assert value["strategy"] is None and value["supertrend_multiplier"] is None
+
+def test_profit_factor_zero_losses_and_with_losses():
+    winners=qualify_trades([trade("w",11)])["qualifying"]
+    assert performance_statistics(winners)["profit_factor"]=="INFINITE"
+    mixed=qualify_trades([trade("w",11),trade("l",-4)])["qualifying"]
+    assert performance_statistics(mixed)["profit_factor"]==pytest.approx(10/5)
+
+def test_net_pnl_after_fees_and_max_drawdown():
+    values=qualify_trades([trade("a",11),trade("b",-4),trade("c",-3)])["qualifying"]
+    stats=performance_statistics(values)
+    assert stats["cumulative_pnl"]==[10.0,5.0,1.0] and stats["max_drawdown"]==9.0
+
+def test_invalid_nonfinite_pnl_rejected():
+    assert qualify_trades([trade(pnl=float("nan"))])["rejected"][0]["reason"]=="MALFORMED"
+
+def test_false_flip_proven_and_not_proven():
+    proven=qualify_trades([trade(metrics={"flip_count":1,"bars_to_reversal":2})])["qualifying"][0]
+    assert next(x for x in classify_trade_patterns(proven) if x["pattern"]=="FALSE_FLIP")["status"]=="PROVEN"
+    absent=qualify_trades([trade()])["qualifying"][0]
+    assert next(x for x in classify_trade_patterns(absent) if x["pattern"]=="FALSE_FLIP")["status"]=="NOT_PROVEN"
+
+def test_low_volatility_whipsaw():
+    value=qualify_trades([trade(metrics={"atr":0.2,"atr_floor":0.5,"reversal_count":2})])["qualifying"][0]
+    assert next(x for x in classify_trade_patterns(value) if x["pattern"]=="LOW_VOLATILITY_WHIPSAW")["status"]=="PROVEN"
+
+def test_multiplier_metadata_and_sensitivity():
+    value=qualify_trades([trade(supertrend_multiplier=3,metrics={"supertrend_multiplier":3,"comparison_multiplier":2})])["qualifying"][0]
+    assert value["supertrend_multiplier"]==3
+    assert next(x for x in classify_trade_patterns(value) if x["pattern"]=="MULTIPLIER_SENSITIVITY")["status"]=="PROVEN"
+
+def test_recommendations_cite_trades_and_evidence():
+    metrics={"flip_count":1,"bars_to_reversal":1}
+    values=qualify_trades([trade("a",metrics=metrics),trade("b",metrics=metrics)])["qualifying"]
+    recommendation=recommend_experiments(values)[0]
+    assert recommendation["supporting_trade_ids"]==["a","b"] and recommendation["supporting_evidence_refs"]==["exec:1"]
+    assert recommendation["evidence_status"]=="ELIGIBLE" and recommendation["authority"]=="ANALYSIS_ONLY"
+
+def test_recommendation_below_threshold_blocked():
+    value=qualify_trades([trade(metrics={"flip_count":1,"bars_to_reversal":1})])["qualifying"]
+    assert recommend_experiments(value)[0]["evidence_status"]=="BLOCKED_BELOW_THRESHOLD"
+
+def test_recommendations_limited_to_three():
+    metrics={"flip_count":1,"bars_to_reversal":1,"atr":0.1,"atr_floor":0.5,"reversal_count":3,"duration_seconds":20,
+      "supertrend_multiplier":3,"comparison_multiplier":2,"trend_bars":1,"minimum_trend_bars":4}
+    values=qualify_trades([trade("a",-2,metrics=metrics),trade("b",-2,metrics=metrics)])["qualifying"]
+    assert len(recommend_experiments(values))==3
+
+def test_30_trade_progress_accounting():
+    result=progress_accounting(software_complete=100,qualifying_trades=30,evidence_proven=True,analysis_complete=True)
+    assert result=={"software_complete":100,"evidence_complete":100.0,"trade_analysis_complete":100.0,"release_ready":100,"qualifying_trades":30,"target_trades":30}
+
+def test_progress_does_not_fabricate_zero():
+    result=progress_accounting(software_complete=100,qualifying_trades=None)
+    assert result["qualifying_trades"]=="NOT_PROVEN" and result["release_ready"]=="NOT_PROVEN"
+
+def test_typed_evidence_does_not_cross_prove_market_condition():
+    value=qualify_trades([trade(evidence=[typed_evidence("trade_execution")])])["qualifying"][0]
+    assert value["market_condition"] is None
+
+def test_analysis_output_contract():
+    result=analyze_trades([trade()],evidence_proven=True)
+    assert set(result)>={"trade_details","summary","losing_patterns","winning_patterns","recommended_experiments","progress"}
+
+def test_no_broker_or_runtime_mutation_authority():
+    import inspect
+    from automation.orchestration.postmortem import aios_postmortem_engine_v1 as module
+    source=inspect.getsource(module).lower()
+    assert "import requests" not in source and "import socket" not in source and "subprocess" not in source

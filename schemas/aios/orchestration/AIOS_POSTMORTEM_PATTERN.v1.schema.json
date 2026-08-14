@@ -2,6 +2,11 @@
   "$id": "https://aios.local/schemas/AIOS_POSTMORTEM_PATTERN.v1.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "$defs": {
+    "tradePattern": {
+      "enum": ["FALSE_FLIP", "LOW_VOLATILITY_WHIPSAW", "RAPID_REVERSAL", "MULTIPLIER_SENSITIVITY", "INSUFFICIENT_TREND_PERSISTENCE", "WINNER_TREND_PERSISTENCE", "FAVORABLE_VOLATILITY_REGIME", "NOT_PROVEN"]
+    }
+  },
   "properties": {
     "authority": {
       "const": "OPERATIONAL_EVIDENCE_ONLY"

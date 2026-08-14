@@ -2,6 +2,19 @@
   "$id": "https://aios.local/schemas/AIOS_POSTMORTEM_EVENT.v1.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "$defs": {
+    "typedEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_type", "reference", "evidence_hash"],
+      "properties": {
+        "evidence_type": {"enum": ["trade_execution", "signal", "market_condition", "campaign_runtime", "validation", "human_review"]},
+        "reference": {"type": "string", "minLength": 1},
+        "evidence_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source": {"type": ["string", "null"]}
+      }
+    }
+  },
   "properties": {
     "base_sha": {
       "minLength": 1,
@@ -31,6 +44,7 @@
       "uniqueItems": true
     },
     "evidence_references": {
+      "items": {"oneOf": [{"type": "string"}, {"$ref": "#/$defs/typedEvidence"}]},
       "type": "array",
       "uniqueItems": true
     },
