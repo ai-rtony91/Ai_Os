@@ -93,7 +93,12 @@ def _candidate_from_signal(signal: dict[str, Any], snapshot: dict[str, Any]) -> 
     }
 
 
-def _capture(client: OandaReadOnlyClient, now: datetime) -> tuple[dict[str, Any], dict[str, Any]]:
+def _capture(
+    client: OandaReadOnlyClient,
+    now: datetime,
+    *,
+    pricing_now: Callable[[], datetime] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     transport = resolve_canonical_practice_transport(client)
     candle_payload = transport.candles(INSTRUMENT, granularity=GRANULARITY, count=CANDLE_COUNT)
     candles = extract_canonical_completed_candles(candle_payload)
@@ -102,11 +107,12 @@ def _capture(client: OandaReadOnlyClient, now: datetime) -> tuple[dict[str, Any]
     )
     signal = build_signal_state(history, generated_at_utc=_stamp(now))
     pricing = transport.pricing((INSTRUMENT,))
+    pricing_validation_time = (pricing_now or _utc_now)().astimezone(timezone.utc)
     snapshot = extract_sanitized_price_snapshot(
         pricing,
         broker_call_performed=True,
         credentials_loaded_runtime_only=True,
-        now=now,
+        now=pricing_validation_time,
     )
     # The paper-session controller deliberately receives only its narrower,
     # sanitized snapshot schema; runtime credential metadata never crosses it.
@@ -154,7 +160,7 @@ def completed_paper_records(
             return
         current = now().astimezone(timezone.utc)
         try:
-            signal, snapshot = _capture(client, current)
+            signal, snapshot = _capture(client, current, pricing_now=now)
         except OandaReadOnlyClientError:
             yield CampaignHalt("PRACTICE_DATA_UNAVAILABLE")
             return
