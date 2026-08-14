@@ -16,15 +16,20 @@
     },
     "normalizedTrade": {
       "type": "object",
-      "required": ["trade_id", "instrument", "side", "entry_timestamp", "exit_timestamp", "entry_price", "exit_price", "realized_pnl", "net_pnl", "duration", "qualification_status", "evidence_references", "evidence_hashes"],
+      "additionalProperties": false,
+      "required": ["trade_id", "instrument", "side", "entry_timestamp", "exit_timestamp", "entry_price", "exit_price", "signal_trigger", "strategy", "supertrend_period", "supertrend_multiplier", "stop_loss", "take_profit", "realized_pnl", "fees", "net_pnl", "duration", "market_condition", "evidence_references", "evidence_hashes", "qualification_status", "classification"],
       "properties": {
         "trade_id": {"type": "string", "minLength": 1}, "instrument": {"type": "string", "minLength": 1},
         "side": {"enum": ["BUY", "SELL"]}, "entry_timestamp": {"type": "string", "format": "date-time"},
         "exit_timestamp": {"type": "string", "format": "date-time"}, "entry_price": {"type": "number"},
         "exit_price": {"type": "number"}, "realized_pnl": {"type": "number"}, "fees": {"type": ["number", "null"]},
-        "net_pnl": {"type": "number"}, "duration": {"type": "number", "minimum": 0},
+        "signal_trigger": {"type": ["string", "null"]}, "strategy": {"type": ["string", "null"]},
+        "supertrend_period": {"type": ["number", "null"]}, "supertrend_multiplier": {"type": ["number", "null"]},
+        "stop_loss": {"type": ["number", "null"]}, "take_profit": {"type": ["number", "null"]},
+        "net_pnl": {"type": "number"}, "duration": {"type": "number", "minimum": 0}, "market_condition": {"type": ["string", "null"]},
         "qualification_status": {"const": "QUALIFYING"}, "evidence_references": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
-        "evidence_hashes": {"type": "array", "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "uniqueItems": true}
+        "evidence_hashes": {"type": "array", "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "uniqueItems": true},
+        "classification": {"type": "array", "items": {"$ref": "AIOS_POSTMORTEM_PATTERN.v1.schema.json#/$defs/patternClassification"}}
       }
     },
     "rejection": {
@@ -45,7 +50,20 @@
       "properties": {"software_complete": {"type": "number", "minimum": 0, "maximum": 100},
         "evidence_complete": {"oneOf": [{"type": "number"}, {"const": "NOT_PROVEN"}]}, "trade_analysis_complete": {"oneOf": [{"type": "number"}, {"const": "NOT_PROVEN"}]},
         "release_ready": {"oneOf": [{"type": "number"}, {"const": "NOT_PROVEN"}]}, "qualifying_trades": {"oneOf": [{"type": "integer"}, {"const": "NOT_PROVEN"}]},
-        "target_trades": {"type": "integer", "minimum": 1}}
+        "target_trades": {"const": 30}}
+    },
+    "analysisResult": {
+      "type": "object", "additionalProperties": false,
+      "required": ["trade_records", "qualification_results", "performance_statistics", "losing_patterns", "winning_patterns", "recommendations", "progress"],
+      "properties": {
+        "trade_records": {"type": "array", "items": {"$ref": "#/$defs/normalizedTrade"}},
+        "qualification_results": {"type": "array", "items": {"$ref": "#/$defs/rejection"}},
+        "performance_statistics": {"$ref": "#/$defs/statistics"},
+        "losing_patterns": {"type": "array", "items": {"$ref": "AIOS_POSTMORTEM_PATTERN.v1.schema.json#/$defs/rankedPattern"}},
+        "winning_patterns": {"type": "array", "items": {"$ref": "AIOS_POSTMORTEM_PATTERN.v1.schema.json#/$defs/rankedPattern"}},
+        "recommendations": {"type": "array", "maxItems": 3, "items": {"$ref": "AIOS_POSTMORTEM_PATTERN.v1.schema.json#/$defs/recommendation"}},
+        "progress": {"$ref": "#/$defs/progress"}
+      }
     }
   },
   "properties": {

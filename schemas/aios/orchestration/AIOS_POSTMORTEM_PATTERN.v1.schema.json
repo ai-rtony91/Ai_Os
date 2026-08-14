@@ -18,6 +18,10 @@
         "observed_pattern": {"$ref": "#/$defs/tradePattern"}, "supporting_trade_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
         "supporting_evidence_refs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}, "proposed_test": {"type": "string", "minLength": 1},
         "evidence_status": {"enum": ["ELIGIBLE", "BLOCKED_BELOW_THRESHOLD"]}, "authority": {"const": "ANALYSIS_ONLY"}}
+    },
+    "rankedPattern": {
+      "type": "object", "required": ["pattern", "frequency", "pnl_impact"], "additionalProperties": false,
+      "properties": {"pattern": {"$ref": "#/$defs/tradePattern"}, "frequency": {"type": "integer", "minimum": 1}, "pnl_impact": {"type": "number"}}
     }
   },
   "properties": {

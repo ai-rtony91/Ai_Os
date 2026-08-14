@@ -5,7 +5,7 @@ from automation.orchestration.postmortem.aios_postmortem_engine_v1 import (
     DuplicateEventError, PatternMemory, PostmortemEngine, ValidationError,
     analyze_trades, build_hypothesis, canonical_json, classify, classify_trade_patterns,
     learn, performance_statistics, progress_accounting, qualify_trades,
-    recommend_experiments, transition, validate_event, validate_pattern,
+    recommend_experiments, transition, validate_analysis_result, validate_event, validate_pattern,
 )
 
 def event(eid="event-1", iid="incident-1"):
@@ -110,7 +110,7 @@ def trade(trade_id="t1", pnl=10.0, status="CLOSED", metrics=None, **overrides):
 
 def test_zero_trades_and_unproven_progress():
     result=analyze_trades([])
-    assert result["summary"]["total_trades"]==0 and result["summary"]["win_rate"] is None
+    assert result["performance_statistics"]["total_trades"]==0 and result["performance_statistics"]["win_rate"] is None
     assert result["progress"]["qualifying_trades"]=="NOT_PROVEN"
 
 def test_winner_loser_mixed_and_breakeven_statistics():
@@ -200,7 +200,7 @@ def test_typed_evidence_does_not_cross_prove_market_condition():
 
 def test_analysis_output_contract():
     result=analyze_trades([trade()])
-    assert set(result)>={"trade_details","summary","losing_patterns","winning_patterns","recommended_experiments","progress"}
+    assert set(result)=={"trade_records","qualification_results","performance_statistics","losing_patterns","winning_patterns","recommendations","progress"}
 
 def test_no_broker_or_runtime_mutation_authority():
     import inspect
@@ -249,3 +249,83 @@ def test_pattern_schema_covers_classification_and_recommendation():
     schema=json.loads(Path("schemas/aios/orchestration/AIOS_POSTMORTEM_PATTERN.v1.schema.json").read_text())
     assert {"tradePattern","patternClassification","recommendation"} <= set(schema["$defs"])
     assert schema["$defs"]["recommendation"]["properties"]["authority"]["const"]=="ANALYSIS_ONLY"
+
+def _schema_documents():
+    from pathlib import Path
+    event=json.loads(Path("schemas/aios/orchestration/AIOS_POSTMORTEM_EVENT.v1.schema.json").read_text())
+    pattern=json.loads(Path("schemas/aios/orchestration/AIOS_POSTMORTEM_PATTERN.v1.schema.json").read_text())
+    return event,pattern
+
+def _schema_validate(value, schema, event=None, pattern=None):
+    event=event or schema; pattern=pattern or schema
+    if "$ref" in schema:
+        ref=schema["$ref"]
+        local_name=ref.rsplit("/",1)[-1]
+        document=pattern if ref.startswith("AIOS_POSTMORTEM_PATTERN") or (ref.startswith("#") and local_name in pattern.get("$defs",{})) else event
+        target=ref.split("#",1)[-1]
+        for part in target.lstrip("/").split("/") if target else []: document=document[part]
+        return _schema_validate(value,document,event,pattern)
+    if "oneOf" in schema:
+        passed=0
+        for candidate in schema["oneOf"]:
+            try: _schema_validate(value,candidate,event,pattern); passed+=1
+            except AssertionError: pass
+        assert passed==1; return
+    if "const" in schema: assert value==schema["const"]
+    if "enum" in schema: assert value in schema["enum"]
+    types=schema.get("type")
+    if types:
+        types=[types] if isinstance(types,str) else types
+        checks={"object":lambda x:isinstance(x,dict),"array":lambda x:isinstance(x,list),"string":lambda x:isinstance(x,str),
+          "number":lambda x:isinstance(x,(int,float)) and not isinstance(x,bool),"integer":lambda x:isinstance(x,int) and not isinstance(x,bool),
+          "boolean":lambda x:isinstance(x,bool),"null":lambda x:x is None}
+        assert any(checks[t](value) for t in types)
+    if isinstance(value,dict):
+        assert set(schema.get("required",[])) <= set(value)
+        if schema.get("additionalProperties") is False: assert set(value) <= set(schema.get("properties",{}))
+        for key,item in value.items():
+            if key in schema.get("properties",{}): _schema_validate(item,schema["properties"][key],event,pattern)
+    if isinstance(value,list):
+        if "maxItems" in schema: assert len(value)<=schema["maxItems"]
+        for item in value:
+            if "items" in schema: _schema_validate(item,schema["items"],event,pattern)
+
+def _validate_emitted_schema(result):
+    event,pattern=_schema_documents()
+    _schema_validate(result,event["$defs"]["analysisResult"],event,pattern)
+
+def test_valid_mixed_trade_analysis_schema_passes():
+    result=analyze_trades([trade("w",11),trade("l",-4)])
+    assert validate_analysis_result(result)==result; _validate_emitted_schema(result)
+
+def test_zero_trade_not_proven_schema_passes():
+    result=analyze_trades([])
+    assert result["progress"]["qualifying_trades"]=="NOT_PROVEN"; _validate_emitted_schema(result)
+
+def test_malformed_normalized_trade_contract_fails():
+    result=analyze_trades([trade()]); del result["trade_records"][0]["trade_id"]
+    with pytest.raises((ValidationError,AssertionError)): validate_analysis_result(result)
+    with pytest.raises(AssertionError): _validate_emitted_schema(result)
+
+def test_undeclared_top_level_analysis_field_fails():
+    result=analyze_trades([]); result["unexpected"]=True
+    with pytest.raises((ValidationError,AssertionError)): validate_analysis_result(result)
+    with pytest.raises(AssertionError): _validate_emitted_schema(result)
+
+def test_malformed_statistics_contract_fails():
+    result=analyze_trades([]); result["performance_statistics"]["total_trades"]=1
+    with pytest.raises(ValidationError): validate_analysis_result(result)
+
+def test_malformed_recommendation_contract_fails():
+    result=analyze_trades([]); result["recommendations"]=[{"authority":"ANALYSIS_ONLY"}]
+    with pytest.raises(ValidationError): validate_analysis_result(result)
+    with pytest.raises(AssertionError): _validate_emitted_schema(result)
+
+def test_malformed_progress_proof_contract_fails():
+    result=analyze_trades([]); result["progress"]["evidence_complete"]=100
+    with pytest.raises(ValidationError): validate_analysis_result(result)
+
+def test_engine_generated_campaign_result_validates_end_to_end():
+    evidence=[typed_evidence("campaign_runtime","campaign:1"),typed_evidence("validation","validation:1")]
+    result=analyze_trades([trade()],campaign_evidence=evidence)
+    assert result["progress"]["qualifying_trades"]==1; _validate_emitted_schema(result)

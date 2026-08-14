@@ -10,7 +10,6 @@ import hashlib
 import json
 import math
 import re
-from collections import Counter
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
@@ -348,19 +347,54 @@ def progress_accounting(*, software_complete: float, qualifying_trade_ids: list[
     return {"software_complete": software_complete, "evidence_complete": evidence_progress, "trade_analysis_complete": analysis,
         "release_ready": release, "qualifying_trades": qualifying, "target_trades": target_trades}
 
+def validate_analysis_result(result: Mapping[str, Any]) -> dict[str, Any]:
+    """Validate the closed top-level structure emitted by :func:`analyze_trades`."""
+    required = {"trade_records", "qualification_results", "performance_statistics", "losing_patterns",
+                "winning_patterns", "recommendations", "progress"}
+    if not isinstance(result, Mapping) or set(result) != required: raise ValidationError("analysis result fields do not match closed contract")
+    if not isinstance(result["trade_records"], list) or not isinstance(result["qualification_results"], list): raise ValidationError("invalid trade collections")
+    trade_fields = {"trade_id", "instrument", "side", "entry_timestamp", "exit_timestamp", "entry_price", "exit_price",
+        "signal_trigger", "strategy", "supertrend_period", "supertrend_multiplier", "stop_loss", "take_profit", "realized_pnl",
+        "fees", "net_pnl", "duration", "market_condition", "evidence_references", "evidence_hashes", "qualification_status", "classification"}
+    for trade in result["trade_records"]:
+        if not isinstance(trade, Mapping) or set(trade) != trade_fields or trade["qualification_status"] != "QUALIFYING": raise ValidationError("malformed normalized trade")
+        for field in ("entry_price", "exit_price", "realized_pnl", "net_pnl", "duration"):
+            _finite_number(trade[field], field, required=True)
+        if trade["fees"] is not None: _finite_number(trade["fees"], "fees", required=True)
+        if not isinstance(trade["classification"], list): raise ValidationError("missing trade classifications")
+    allowed_rejections = {"OPEN", "NONQUALIFYING", "UNPROVEN_CLOSED_STATE", "MALFORMED", "DUPLICATE", "MISSING_REQUIRED_EVIDENCE"}
+    if any(not isinstance(x, Mapping) or set(x) != {"trade_id", "reason"} or x["reason"] not in allowed_rejections for x in result["qualification_results"]): raise ValidationError("malformed qualification result")
+    stats = result["performance_statistics"]
+    if not isinstance(stats, Mapping) or set(stats) != {"total_trades", "wins", "losses", "breakeven", "win_rate", "average_win", "average_loss", "gross_profit", "gross_loss", "net_pnl", "profit_factor", "expectancy", "cumulative_pnl", "max_drawdown"}: raise ValidationError("malformed statistics")
+    if stats["total_trades"] != len(result["trade_records"]): raise ValidationError("statistics contradict trade records")
+    if not isinstance(result["recommendations"], list) or len(result["recommendations"]) > 3: raise ValidationError("malformed recommendations")
+    for recommendation in result["recommendations"]:
+        if not isinstance(recommendation, Mapping) or recommendation.get("authority") != "ANALYSIS_ONLY" or not recommendation.get("supporting_trade_ids") or not recommendation.get("supporting_evidence_refs"): raise ValidationError("malformed recommendation")
+    progress = result["progress"]
+    if not isinstance(progress, Mapping) or set(progress) != {"software_complete", "evidence_complete", "trade_analysis_complete", "release_ready", "qualifying_trades", "target_trades"} or progress["target_trades"] != 30: raise ValidationError("malformed progress")
+    if progress["evidence_complete"] != "NOT_PROVEN" and progress["qualifying_trades"] == "NOT_PROVEN": raise ValidationError("progress lacks evidence proof")
+    _walk(result)
+    return deepcopy(dict(result))
+
 def analyze_trades(records: Any, *, minimum_recommendation_support: int = 2, campaign_evidence: list[Mapping[str, Any]] | None = None, **untrusted_flags: Any) -> dict[str, Any]:
     qualified = qualify_trades(records); trades = qualified["qualifying"]; stats = performance_statistics(trades)
     patterns = {x["trade_id"]: classify_trade_patterns(x) for x in trades}
-    losing, winning = Counter(), Counter()
+    losing, winning = {}, {}
     for trade in trades:
         target = winning if trade["net_pnl"] > 0 else losing
         for p in patterns[trade["trade_id"]]:
-            if p["status"] == "PROVEN": target[p["pattern"]] += 1
-    return {"trade_details": [{**{k: x.get(k) for k in ("trade_id", "instrument", "side", "entry_timestamp", "exit_timestamp", "entry_price", "exit_price", "signal_trigger", "net_pnl", "market_condition")}, "classification": patterns[x["trade_id"]]} for x in trades],
-        "summary": stats, "rejected": qualified["rejected"], "losing_patterns": losing.most_common(), "winning_patterns": winning.most_common(),
-        "recommended_experiments": recommend_experiments(trades, minimum_recommendation_support),
+            if p["status"] == "PROVEN":
+                item = target.setdefault(p["pattern"], {"pattern": p["pattern"], "frequency": 0, "pnl_impact": 0.0})
+                item["frequency"] += 1; item["pnl_impact"] += trade["net_pnl"]
+    trade_fields = ("trade_id", "instrument", "side", "entry_timestamp", "exit_timestamp", "entry_price", "exit_price", "signal_trigger", "strategy", "supertrend_period", "supertrend_multiplier", "stop_loss", "take_profit", "realized_pnl", "fees", "net_pnl", "duration", "market_condition", "evidence_references", "evidence_hashes", "qualification_status")
+    result = {"trade_records": [{**{k: x.get(k) for k in trade_fields}, "classification": patterns[x["trade_id"]]} for x in trades],
+        "performance_statistics": stats, "qualification_results": qualified["rejected"],
+        "losing_patterns": sorted(losing.values(), key=lambda x: (-x["frequency"], x["pnl_impact"], x["pattern"])),
+        "winning_patterns": sorted(winning.values(), key=lambda x: (-x["frequency"], -x["pnl_impact"], x["pattern"])),
+        "recommendations": recommend_experiments(trades, minimum_recommendation_support),
         "progress": progress_accounting(software_complete=100.0, qualifying_trade_ids=[x["trade_id"] for x in trades],
             evidence_items=campaign_evidence, analyzed_trade_ids=[x["trade_id"] for x in trades])}
+    return validate_analysis_result(result)
 
 class PostmortemEngine:
     def __init__(self) -> None: self.seen_event_ids: set[str] = set(); self.patterns = PatternMemory()
