@@ -151,43 +151,47 @@ def test_invalid_nonfinite_pnl_rejected():
     assert qualify_trades([trade(pnl=float("nan"))])["rejected"][0]["reason"]=="MALFORMED"
 
 def test_false_flip_proven_and_not_proven():
-    proven=qualify_trades([trade(metrics={"flip_count":1,"bars_to_reversal":2})])["qualifying"][0]
+    proven=qualify_trades([trade(metrics={"flip_count":1,"bars_to_reversal":2},evidence=[typed_evidence(),typed_evidence("signal","signal:1")])])["qualifying"][0]
     assert next(x for x in classify_trade_patterns(proven) if x["pattern"]=="FALSE_FLIP")["status"]=="PROVEN"
     absent=qualify_trades([trade()])["qualifying"][0]
     assert next(x for x in classify_trade_patterns(absent) if x["pattern"]=="FALSE_FLIP")["status"]=="NOT_PROVEN"
 
 def test_low_volatility_whipsaw():
-    value=qualify_trades([trade(metrics={"atr":0.2,"atr_floor":0.5,"reversal_count":2})])["qualifying"][0]
+    value=qualify_trades([trade(metrics={"atr":0.2,"atr_floor":0.5,"reversal_count":2},evidence=[typed_evidence(),typed_evidence("market_condition","market:1")])])["qualifying"][0]
     assert next(x for x in classify_trade_patterns(value) if x["pattern"]=="LOW_VOLATILITY_WHIPSAW")["status"]=="PROVEN"
 
 def test_multiplier_metadata_and_sensitivity():
-    value=qualify_trades([trade(supertrend_multiplier=3,metrics={"supertrend_multiplier":3,"comparison_multiplier":2})])["qualifying"][0]
+    value=qualify_trades([trade(supertrend_multiplier=3,metrics={"supertrend_multiplier":3,"comparison_multiplier":2},evidence=[typed_evidence(),typed_evidence("signal","signal:1")])])["qualifying"][0]
     assert value["supertrend_multiplier"]==3
     assert next(x for x in classify_trade_patterns(value) if x["pattern"]=="MULTIPLIER_SENSITIVITY")["status"]=="PROVEN"
 
 def test_recommendations_cite_trades_and_evidence():
     metrics={"flip_count":1,"bars_to_reversal":1}
-    values=qualify_trades([trade("a",metrics=metrics),trade("b",metrics=metrics)])["qualifying"]
+    evidence=[typed_evidence(),typed_evidence("signal","signal:1")]
+    values=qualify_trades([trade("a",metrics=metrics,evidence=evidence),trade("b",metrics=metrics,evidence=evidence)])["qualifying"]
     recommendation=recommend_experiments(values)[0]
-    assert recommendation["supporting_trade_ids"]==["a","b"] and recommendation["supporting_evidence_refs"]==["exec:1"]
+    assert recommendation["supporting_trade_ids"]==["a","b"] and recommendation["supporting_evidence_refs"]==["exec:1","signal:1"]
     assert recommendation["evidence_status"]=="ELIGIBLE" and recommendation["authority"]=="ANALYSIS_ONLY"
 
 def test_recommendation_below_threshold_blocked():
-    value=qualify_trades([trade(metrics={"flip_count":1,"bars_to_reversal":1})])["qualifying"]
+    value=qualify_trades([trade(metrics={"flip_count":1,"bars_to_reversal":1},evidence=[typed_evidence(),typed_evidence("signal","signal:1")])])["qualifying"]
     assert recommend_experiments(value)[0]["evidence_status"]=="BLOCKED_BELOW_THRESHOLD"
 
 def test_recommendations_limited_to_three():
     metrics={"flip_count":1,"bars_to_reversal":1,"atr":0.1,"atr_floor":0.5,"reversal_count":3,"duration_seconds":20,
       "supertrend_multiplier":3,"comparison_multiplier":2,"trend_bars":1,"minimum_trend_bars":4}
-    values=qualify_trades([trade("a",-2,metrics=metrics),trade("b",-2,metrics=metrics)])["qualifying"]
+    evidence=[typed_evidence(),typed_evidence("signal","signal:1"),typed_evidence("market_condition","market:1")]
+    values=qualify_trades([trade("a",-2,metrics=metrics,evidence=evidence),trade("b",-2,metrics=metrics,evidence=evidence)])["qualifying"]
     assert len(recommend_experiments(values))==3
 
 def test_30_trade_progress_accounting():
-    result=progress_accounting(software_complete=100,qualifying_trades=30,evidence_proven=True,analysis_complete=True)
+    evidence=[typed_evidence("campaign_runtime","campaign:1"),typed_evidence("validation","validation:1")]
+    ids=[f"t{x}" for x in range(30)]
+    result=progress_accounting(software_complete=100,qualifying_trade_ids=ids,evidence_items=evidence,analyzed_trade_ids=ids)
     assert result=={"software_complete":100,"evidence_complete":100.0,"trade_analysis_complete":100.0,"release_ready":100,"qualifying_trades":30,"target_trades":30}
 
 def test_progress_does_not_fabricate_zero():
-    result=progress_accounting(software_complete=100,qualifying_trades=None)
+    result=progress_accounting(software_complete=100,qualifying_trade_ids=None)
     assert result["qualifying_trades"]=="NOT_PROVEN" and result["release_ready"]=="NOT_PROVEN"
 
 def test_typed_evidence_does_not_cross_prove_market_condition():
@@ -195,7 +199,7 @@ def test_typed_evidence_does_not_cross_prove_market_condition():
     assert value["market_condition"] is None
 
 def test_analysis_output_contract():
-    result=analyze_trades([trade()],evidence_proven=True)
+    result=analyze_trades([trade()])
     assert set(result)>={"trade_details","summary","losing_patterns","winning_patterns","recommended_experiments","progress"}
 
 def test_no_broker_or_runtime_mutation_authority():
@@ -203,3 +207,45 @@ def test_no_broker_or_runtime_mutation_authority():
     from automation.orchestration.postmortem import aios_postmortem_engine_v1 as module
     source=inspect.getsource(module).lower()
     assert "import requests" not in source and "import socket" not in source and "subprocess" not in source
+
+def test_explicit_qualification_statuses():
+    result=qualify_trades([trade("q"),trade("o",status="OPEN"),trade("u",status="UNKNOWN"),trade("n",qualifies=False)])
+    assert result["qualifying"][0]["qualification_status"]=="QUALIFYING"
+    assert [x["reason"] for x in result["rejected"]]==["OPEN","UNPROVEN_CLOSED_STATE","NONQUALIFYING"]
+
+def test_malformed_pattern_metrics_are_not_proven_or_raised():
+    value=qualify_trades([trade(metrics={"flip_count":"one","bars_to_reversal":2},evidence=[typed_evidence(),typed_evidence("signal")])])["qualifying"][0]
+    pattern=next(x for x in classify_trade_patterns(value) if x["pattern"]=="FALSE_FLIP")
+    assert pattern["status"]=="NOT_PROVEN" and pattern["reason"]=="MALFORMED_METRICS"
+
+def test_pattern_requires_typed_supporting_evidence():
+    value=qualify_trades([trade(metrics={"flip_count":1,"bars_to_reversal":2})])["qualifying"][0]
+    pattern=next(x for x in classify_trade_patterns(value) if x["pattern"]=="FALSE_FLIP")
+    assert pattern["status"]=="NOT_PROVEN" and pattern["reason"]=="MISSING_TYPED_EVIDENCE"
+
+def test_malformed_metrics_cannot_enable_recommendation():
+    evidence=[typed_evidence(),typed_evidence("signal")]
+    values=qualify_trades([trade("a",metrics={"flip_count":"one","bars_to_reversal":1},evidence=evidence),trade("b",metrics={"flip_count":"one","bars_to_reversal":1},evidence=evidence)])["qualifying"]
+    assert recommend_experiments(values)==[]
+
+def test_raw_boolean_cannot_promote_progress():
+    result=progress_accounting(software_complete=100,qualifying_trade_ids=["t1"],evidence_proven=True,analysis_complete=True)
+    assert result["evidence_complete"]=="NOT_PROVEN" and result["release_ready"]=="NOT_PROVEN"
+
+def test_campaign_and_validation_evidence_are_both_required():
+    campaign=[typed_evidence("campaign_runtime")]
+    result=progress_accounting(software_complete=100,qualifying_trade_ids=["t1"],evidence_items=campaign,analyzed_trade_ids=["t1"])
+    assert result["qualifying_trades"]=="NOT_PROVEN"
+
+def test_event_schema_covers_emitted_trade_contracts():
+    from pathlib import Path
+    schema=json.loads(Path("schemas/aios/orchestration/AIOS_POSTMORTEM_EVENT.v1.schema.json").read_text())
+    assert {"typedEvidence","normalizedTrade","rejection","statistics","progress"} <= set(schema["$defs"])
+    assert "NONQUALIFYING" in schema["$defs"]["rejection"]["properties"]["reason"]["enum"]
+    assert "NOT_PROVEN" in canonical_json(schema["$defs"]["progress"])
+
+def test_pattern_schema_covers_classification_and_recommendation():
+    from pathlib import Path
+    schema=json.loads(Path("schemas/aios/orchestration/AIOS_POSTMORTEM_PATTERN.v1.schema.json").read_text())
+    assert {"tradePattern","patternClassification","recommendation"} <= set(schema["$defs"])
+    assert schema["$defs"]["recommendation"]["properties"]["authority"]["const"]=="ANALYSIS_ONLY"

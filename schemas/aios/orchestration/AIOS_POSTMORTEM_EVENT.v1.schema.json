@@ -13,6 +13,39 @@
         "evidence_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "source": {"type": ["string", "null"]}
       }
+    },
+    "normalizedTrade": {
+      "type": "object",
+      "required": ["trade_id", "instrument", "side", "entry_timestamp", "exit_timestamp", "entry_price", "exit_price", "realized_pnl", "net_pnl", "duration", "qualification_status", "evidence_references", "evidence_hashes"],
+      "properties": {
+        "trade_id": {"type": "string", "minLength": 1}, "instrument": {"type": "string", "minLength": 1},
+        "side": {"enum": ["BUY", "SELL"]}, "entry_timestamp": {"type": "string", "format": "date-time"},
+        "exit_timestamp": {"type": "string", "format": "date-time"}, "entry_price": {"type": "number"},
+        "exit_price": {"type": "number"}, "realized_pnl": {"type": "number"}, "fees": {"type": ["number", "null"]},
+        "net_pnl": {"type": "number"}, "duration": {"type": "number", "minimum": 0},
+        "qualification_status": {"const": "QUALIFYING"}, "evidence_references": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "evidence_hashes": {"type": "array", "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "uniqueItems": true}
+      }
+    },
+    "rejection": {
+      "type": "object", "required": ["trade_id", "reason"], "additionalProperties": false,
+      "properties": {"trade_id": {"type": "string"}, "reason": {"enum": ["OPEN", "NONQUALIFYING", "UNPROVEN_CLOSED_STATE", "MALFORMED", "DUPLICATE", "MISSING_REQUIRED_EVIDENCE"]}}
+    },
+    "statistics": {
+      "type": "object",
+      "required": ["total_trades", "wins", "losses", "breakeven", "win_rate", "average_win", "average_loss", "gross_profit", "gross_loss", "net_pnl", "profit_factor", "expectancy", "cumulative_pnl", "max_drawdown"],
+      "properties": {"total_trades": {"type": "integer", "minimum": 0}, "wins": {"type": "integer", "minimum": 0}, "losses": {"type": "integer", "minimum": 0}, "breakeven": {"type": "integer", "minimum": 0},
+        "win_rate": {"type": ["number", "null"]}, "average_win": {"type": ["number", "null"]}, "average_loss": {"type": ["number", "null"]},
+        "gross_profit": {"type": "number"}, "gross_loss": {"type": "number"}, "net_pnl": {"type": "number"},
+        "profit_factor": {"oneOf": [{"type": ["number", "null"]}, {"const": "INFINITE"}]}, "expectancy": {"type": ["number", "null"]},
+        "cumulative_pnl": {"type": "array", "items": {"type": "number"}}, "max_drawdown": {"type": "number", "minimum": 0}}
+    },
+    "progress": {
+      "type": "object", "required": ["software_complete", "evidence_complete", "trade_analysis_complete", "release_ready", "qualifying_trades", "target_trades"],
+      "properties": {"software_complete": {"type": "number", "minimum": 0, "maximum": 100},
+        "evidence_complete": {"oneOf": [{"type": "number"}, {"const": "NOT_PROVEN"}]}, "trade_analysis_complete": {"oneOf": [{"type": "number"}, {"const": "NOT_PROVEN"}]},
+        "release_ready": {"oneOf": [{"type": "number"}, {"const": "NOT_PROVEN"}]}, "qualifying_trades": {"oneOf": [{"type": "integer"}, {"const": "NOT_PROVEN"}]},
+        "target_trades": {"type": "integer", "minimum": 1}}
     }
   },
   "properties": {

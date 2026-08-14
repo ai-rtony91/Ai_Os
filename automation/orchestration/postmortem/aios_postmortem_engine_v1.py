@@ -66,13 +66,13 @@ IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
 EVIDENCE_TYPES = {"trade_execution", "signal", "market_condition", "campaign_runtime", "validation", "human_review"}
 SIDES = {"BUY", "SELL"}
 PATTERN_REQUIREMENTS = {
-    "FALSE_FLIP": {"flip_count", "bars_to_reversal"},
-    "LOW_VOLATILITY_WHIPSAW": {"atr", "atr_floor", "reversal_count"},
-    "RAPID_REVERSAL": {"reversal_count", "duration_seconds"},
-    "MULTIPLIER_SENSITIVITY": {"supertrend_multiplier", "comparison_multiplier"},
-    "INSUFFICIENT_TREND_PERSISTENCE": {"trend_bars", "minimum_trend_bars"},
-    "WINNER_TREND_PERSISTENCE": {"trend_bars", "minimum_trend_bars"},
-    "FAVORABLE_VOLATILITY_REGIME": {"atr", "atr_floor"},
+    "FALSE_FLIP": ({"flip_count", "bars_to_reversal"}, "signal"),
+    "LOW_VOLATILITY_WHIPSAW": ({"atr", "atr_floor", "reversal_count"}, "market_condition"),
+    "RAPID_REVERSAL": ({"reversal_count", "duration_seconds"}, "signal"),
+    "MULTIPLIER_SENSITIVITY": ({"supertrend_multiplier", "comparison_multiplier"}, "signal"),
+    "INSUFFICIENT_TREND_PERSISTENCE": ({"trend_bars", "minimum_trend_bars"}, "signal"),
+    "WINNER_TREND_PERSISTENCE": ({"trend_bars", "minimum_trend_bars"}, "signal"),
+    "FAVORABLE_VOLATILITY_REGIME": ({"atr", "atr_floor"}, "market_condition"),
 }
 
 TRANSITIONS = {
@@ -242,7 +242,9 @@ def normalize_trade(record: Mapping[str, Any]) -> dict[str, Any]:
     missing = [x for x in required if x not in record]
     if missing: raise ValidationError(f"missing trade fields: {missing}")
     if not isinstance(record["trade_id"], str) or not IDENTIFIER.fullmatch(record["trade_id"]): raise ValidationError("invalid trade ID")
-    if record["status"] != "CLOSED": raise ValidationError("UNPROVEN_CLOSED_STATE" if record["status"] in (None, "NOT_PROVEN") else "OPEN")
+    if record["status"] != "CLOSED":
+        raise ValidationError("OPEN" if record["status"] == "OPEN" else "UNPROVEN_CLOSED_STATE")
+    if record.get("qualifies") is False: raise ValidationError("NONQUALIFYING")
     if record["side"] not in SIDES or not isinstance(record["instrument"], str) or not record["instrument"]: raise ValidationError("malformed trade identity")
     entry = datetime.fromisoformat(str(record["entry_timestamp"]).replace("Z", "+00:00")); exit_ = datetime.fromisoformat(str(record["exit_timestamp"]).replace("Z", "+00:00"))
     if exit_ < entry: raise ValidationError("exit precedes entry")
@@ -256,6 +258,7 @@ def normalize_trade(record: Mapping[str, Any]) -> dict[str, Any]:
         "realized_pnl": realized, "fees": fees, "net_pnl": realized - (fees or 0.0), "duration": (exit_ - entry).total_seconds(),
         "evidence_references": [x["reference"] for x in evidence], "evidence_hashes": [x["evidence_hash"] for x in evidence], "evidence": evidence}
     normalized.update({x: record.get(x) for x in optional}); normalized["metrics"] = deepcopy(record.get("metrics", {}))
+    normalized["qualification_status"] = "QUALIFYING"
     return normalized
 
 def qualify_trades(records: Any) -> dict[str, Any]:
@@ -267,7 +270,7 @@ def qualify_trades(records: Any) -> dict[str, Any]:
         try:
             trade = normalize_trade(record); seen.add(trade["trade_id"]); accepted.append(trade)
         except (ValidationError, ValueError, TypeError) as exc:
-            reason = str(exc) if str(exc) in {"OPEN", "UNPROVEN_CLOSED_STATE", "MISSING_REQUIRED_EVIDENCE"} else "MALFORMED"
+            reason = str(exc) if str(exc) in {"OPEN", "NONQUALIFYING", "UNPROVEN_CLOSED_STATE", "MISSING_REQUIRED_EVIDENCE"} else "MALFORMED"
             rejected.append({"trade_id": trade_id or f"INDEX:{index}", "reason": reason})
     return {"qualifying": accepted, "rejected": rejected}
 
@@ -289,8 +292,12 @@ def performance_statistics(trades: list[Mapping[str, Any]]) -> dict[str, Any]:
 def classify_trade_patterns(trade: Mapping[str, Any]) -> list[dict[str, Any]]:
     metrics, pnl = trade.get("metrics", {}), trade.get("net_pnl")
     output = []
-    for name, required in PATTERN_REQUIREMENTS.items():
-        proven = isinstance(metrics, Mapping) and required <= set(metrics)
+    evidence_types = {x.get("evidence_type") for x in trade.get("evidence", []) if isinstance(x, Mapping)}
+    for name, (required, required_evidence_type) in PATTERN_REQUIREMENTS.items():
+        present = isinstance(metrics, Mapping) and required <= set(metrics)
+        typed = present and all(isinstance(metrics[x], (int, float)) and not isinstance(metrics[x], bool) and math.isfinite(metrics[x]) for x in required)
+        evidenced = required_evidence_type in evidence_types
+        proven = typed and evidenced
         matched = False
         if proven:
             if name == "FALSE_FLIP": matched = metrics["flip_count"] >= 1 and metrics["bars_to_reversal"] <= 2
@@ -300,7 +307,9 @@ def classify_trade_patterns(trade: Mapping[str, Any]) -> list[dict[str, Any]]:
             elif name == "INSUFFICIENT_TREND_PERSISTENCE": matched = metrics["trend_bars"] < metrics["minimum_trend_bars"] and pnl is not None and pnl < 0
             elif name == "WINNER_TREND_PERSISTENCE": matched = metrics["trend_bars"] >= metrics["minimum_trend_bars"] and pnl is not None and pnl > 0
             elif name == "FAVORABLE_VOLATILITY_REGIME": matched = metrics["atr"] >= metrics["atr_floor"] and pnl is not None and pnl > 0
-        output.append({"pattern": name, "status": "PROVEN" if proven and matched else "NOT_PROVEN", "supporting_trade_id": trade.get("trade_id") if proven and matched else None})
+        reason = None if proven and matched else ("MISSING_METRICS" if not present else "MALFORMED_METRICS" if not typed else "MISSING_TYPED_EVIDENCE" if not evidenced else "CONDITION_NOT_MET")
+        output.append({"pattern": name, "status": "PROVEN" if proven and matched else "NOT_PROVEN", "reason": reason,
+            "required_evidence_type": required_evidence_type, "supporting_trade_id": trade.get("trade_id") if proven and matched else None})
     return output
 
 def recommend_experiments(trades: list[Mapping[str, Any]], minimum_support: int = 2) -> list[dict[str, Any]]:
@@ -323,16 +332,23 @@ def recommend_experiments(trades: list[Mapping[str, Any]], minimum_support: int 
         if len(result) == 3: break
     return result
 
-def progress_accounting(*, software_complete: float, qualifying_trades: int | None, target_trades: int = 30, evidence_proven: bool = False, analysis_complete: bool = False) -> dict[str, Any]:
+def progress_accounting(*, software_complete: float, qualifying_trade_ids: list[str] | None, evidence_items: list[Mapping[str, Any]] | None = None,
+                        analyzed_trade_ids: list[str] | None = None, target_trades: int = 30, **untrusted_flags: Any) -> dict[str, Any]:
     if target_trades <= 0 or not 0 <= software_complete <= 100: raise ValidationError("invalid progress input")
-    qualifying: int | str = qualifying_trades if evidence_proven and qualifying_trades is not None else "NOT_PROVEN"
-    evidence = min(100.0, qualifying_trades / target_trades * 100) if evidence_proven and qualifying_trades is not None else "NOT_PROVEN"
-    analysis: float | str = evidence if analysis_complete and evidence != "NOT_PROVEN" else "NOT_PROVEN"
-    release: float | str = min(software_complete, evidence, analysis) if isinstance(evidence, float) and isinstance(analysis, float) else "NOT_PROVEN"
-    return {"software_complete": software_complete, "evidence_complete": evidence, "trade_analysis_complete": analysis,
+    evidence = validate_evidence_items(evidence_items or [])
+    types = {x["evidence_type"] for x in evidence}
+    campaign_proven = {"campaign_runtime", "validation"} <= types
+    ids_valid = isinstance(qualifying_trade_ids, list) and len(qualifying_trade_ids) == len(set(qualifying_trade_ids))
+    qualifying: int | str = len(qualifying_trade_ids) if campaign_proven and ids_valid else "NOT_PROVEN"
+    evidence_progress = min(100.0, qualifying / target_trades * 100) if isinstance(qualifying, int) else "NOT_PROVEN"
+    analyzed = set(analyzed_trade_ids or [])
+    analysis_proven = isinstance(qualifying, int) and set(qualifying_trade_ids or []) <= analyzed
+    analysis: float | str = evidence_progress if analysis_proven else "NOT_PROVEN"
+    release: float | str = min(software_complete, evidence_progress, analysis) if isinstance(evidence_progress, float) and isinstance(analysis, float) else "NOT_PROVEN"
+    return {"software_complete": software_complete, "evidence_complete": evidence_progress, "trade_analysis_complete": analysis,
         "release_ready": release, "qualifying_trades": qualifying, "target_trades": target_trades}
 
-def analyze_trades(records: Any, *, minimum_recommendation_support: int = 2, evidence_proven: bool = False) -> dict[str, Any]:
+def analyze_trades(records: Any, *, minimum_recommendation_support: int = 2, campaign_evidence: list[Mapping[str, Any]] | None = None, **untrusted_flags: Any) -> dict[str, Any]:
     qualified = qualify_trades(records); trades = qualified["qualifying"]; stats = performance_statistics(trades)
     patterns = {x["trade_id"]: classify_trade_patterns(x) for x in trades}
     losing, winning = Counter(), Counter()
@@ -343,7 +359,8 @@ def analyze_trades(records: Any, *, minimum_recommendation_support: int = 2, evi
     return {"trade_details": [{**{k: x.get(k) for k in ("trade_id", "instrument", "side", "entry_timestamp", "exit_timestamp", "entry_price", "exit_price", "signal_trigger", "net_pnl", "market_condition")}, "classification": patterns[x["trade_id"]]} for x in trades],
         "summary": stats, "rejected": qualified["rejected"], "losing_patterns": losing.most_common(), "winning_patterns": winning.most_common(),
         "recommended_experiments": recommend_experiments(trades, minimum_recommendation_support),
-        "progress": progress_accounting(software_complete=100.0, qualifying_trades=len(trades), evidence_proven=evidence_proven, analysis_complete=evidence_proven)}
+        "progress": progress_accounting(software_complete=100.0, qualifying_trade_ids=[x["trade_id"] for x in trades],
+            evidence_items=campaign_evidence, analyzed_trade_ids=[x["trade_id"] for x in trades])}
 
 class PostmortemEngine:
     def __init__(self) -> None: self.seen_event_ids: set[str] = set(); self.patterns = PatternMemory()
