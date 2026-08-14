@@ -1,0 +1,205 @@
+{
+  "$id": "https://aios.local/schemas/AIOS_POSTMORTEM_EVENT.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "base_sha": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "branch": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "durability_state": {
+      "enum": [
+        "REMOTE_VERIFIED",
+        "USER_VISIBLE_CAPSULE_VERIFIED",
+        "AT_RISK"
+      ]
+    },
+    "event_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "evidence_hashes": {
+      "items": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evidence_references": {
+      "type": "array",
+      "uniqueItems": true
+    },
+    "failing_stage": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "head_sha": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "hypotheses": {
+      "type": "array",
+      "uniqueItems": true
+    },
+    "incident_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "lane": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "lesson_status": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "next_safe_action": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "outcome_classification": {
+      "enum": [
+        "SUCCESS",
+        "RECOVERED",
+        "BLOCKED_GOVERNANCE",
+        "BLOCKED_EXTERNAL",
+        "REPOSITORY_STATE_MISMATCH",
+        "DIRTY_WORKTREE",
+        "ORIGIN_ABSENT",
+        "ORIGIN_INCORRECT",
+        "AUTHORIZATION_UNAVAILABLE",
+        "LOCAL_COMMIT_AT_RISK",
+        "MISSING_COMMIT",
+        "MISSING_BRANCH",
+        "WORKER_LEASE_EXPIRED",
+        "WORKER_STILL_ACTIVE",
+        "STALE_APPLICATION_LOCK",
+        "GIT_LOCK_REVIEW_REQUIRED",
+        "ORPHANED_APPLY",
+        "DUPLICATE_APPLY",
+        "PACKET_COLLISION",
+        "MALFORMED_PACKET",
+        "VALIDATION_FAILURE",
+        "CI_FAILURE",
+        "CORRUPT_STATE",
+        "QUARANTINED",
+        "UNSAFE_TO_CONTINUE"
+      ]
+    },
+    "packet_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "promotion_status": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recovery_attempts": {
+      "type": "array",
+      "uniqueItems": true
+    },
+    "recovery_result": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "remote_state": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "repository_identity": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "root_cause_status": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "sanitized_detection_signature": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "supervisor_identity": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "task_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "timestamp": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "tree_sha": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "validators_after_recovery": {
+      "type": "array",
+      "uniqueItems": true
+    },
+    "verified_root_cause": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "worker_identity": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "worktree": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "worktree_state": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "incident_id",
+    "packet_id",
+    "task_id",
+    "run_id",
+    "worker_identity",
+    "supervisor_identity",
+    "lane",
+    "timestamp",
+    "repository_identity",
+    "worktree",
+    "branch",
+    "base_sha",
+    "head_sha",
+    "tree_sha",
+    "worktree_state",
+    "remote_state",
+    "failing_stage",
+    "sanitized_detection_signature",
+    "evidence_references",
+    "evidence_hashes",
+    "outcome_classification",
+    "root_cause_status",
+    "verified_root_cause",
+    "hypotheses",
+    "recovery_attempts",
+    "recovery_result",
+    "validators_after_recovery",
+    "durability_state",
+    "lesson_status",
+    "promotion_status",
+    "next_safe_action"
+  ],
+  "title": "AIOS Post-Mortem Event v1",
+  "type": "object"
+}
