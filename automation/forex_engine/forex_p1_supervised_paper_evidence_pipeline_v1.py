@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
+import os
 import re
+import uuid
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +18,33 @@ from automation.forex_engine.forex_profit_track_p1_strategy_evidence_v1 import (
 )
 
 VERSION = "forex_p1_supervised_paper_evidence_pipeline_v1"
+ATOMIC_WRITE_SCHEMA = "AIOS_FOREX_ATOMIC_RECOVERY_EVENT.v1"
+RECOVERY_PAYLOAD_FIELDS = frozenset(
+    {
+        "status",
+        "invalid_current_sha256",
+        "invalid_current_byte_count",
+        "original_read_error",
+        "quarantined_sha256",
+        "retained_records",
+        "trades_invented",
+        "pnl_invented",
+    }
+)
+RECOVERY_RECEIPT_FIELDS = frozenset(
+    {
+        "schema",
+        "version",
+        "observed_at_utc",
+    }
+    | RECOVERY_PAYLOAD_FIELDS
+)
+RECOVERY_STATUSES = frozenset(
+    {
+        "RECOVERED_FROM_LAST_KNOWN_GOOD",
+        "TRUNCATED_FINAL_JSONL_QUARANTINED",
+    }
+)
 REQUIRED_FIELDS = (
     "trade_id", "evidence_type", "strategy_id", "instrument", "direction",
     "entry_timestamp_utc", "exit_timestamp_utc", "entry_price", "exit_price",
@@ -52,6 +82,293 @@ SAFETY_FLAGS = {
     "daemon_created": False,
     "webhook_created": False,
 }
+
+
+def stable_json_bytes(payload: Any) -> bytes:
+    """Serialize JSON deterministically and prove that it can be parsed."""
+    rendered = json.dumps(
+        payload,
+        indent=2,
+        sort_keys=True,
+        allow_nan=False,
+    ) + "\n"
+    json.loads(rendered)
+    return rendered.encode("utf-8")
+
+
+def _atomic_replace_bytes(path: Path, payload: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = path.parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
+    try:
+        with temporary_path.open("xb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary_path, path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+
+def _valid_json_bytes(payload: bytes) -> bool:
+    try:
+        json.loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return False
+    return True
+
+
+def _recovery_path(path: Path) -> Path:
+    return path.with_name(f"{path.name}.recovery.jsonl")
+
+
+def _validated_sha256(value: Any, *, allow_unavailable: bool) -> str:
+    if allow_unavailable and value == "UNAVAILABLE":
+        return value
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise ValueError("invalid_recovery_sha256")
+    return value
+
+
+def _validated_count(value: Any, *, allow_unavailable: bool) -> int | str:
+    if allow_unavailable and value == "UNAVAILABLE":
+        return value
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError("invalid_recovery_count")
+    return value
+
+
+def _sanitize_recovery_payload(
+    payload: Mapping[str, Any],
+) -> dict[str, Any]:
+    status = payload.get("status")
+    if status not in RECOVERY_STATUSES:
+        raise ValueError("invalid_recovery_status")
+
+    sanitized: dict[str, Any] = {"status": status}
+
+    if "invalid_current_sha256" in payload:
+        sanitized["invalid_current_sha256"] = _validated_sha256(
+            payload["invalid_current_sha256"],
+            allow_unavailable=True,
+        )
+    if "invalid_current_byte_count" in payload:
+        sanitized["invalid_current_byte_count"] = _validated_count(
+            payload["invalid_current_byte_count"],
+            allow_unavailable=True,
+        )
+    if "original_read_error" in payload:
+        original_read_error = payload["original_read_error"]
+        if original_read_error not in (None, "OSERROR"):
+            raise ValueError("invalid_original_read_error")
+        sanitized["original_read_error"] = original_read_error
+    if "quarantined_sha256" in payload:
+        sanitized["quarantined_sha256"] = _validated_sha256(
+            payload["quarantined_sha256"],
+            allow_unavailable=False,
+        )
+    if "retained_records" in payload:
+        sanitized["retained_records"] = _validated_count(
+            payload["retained_records"],
+            allow_unavailable=False,
+        )
+    if "trades_invented" in payload:
+        if payload["trades_invented"] != 0:
+            raise ValueError("invalid_trades_invented")
+        sanitized["trades_invented"] = 0
+    if "pnl_invented" in payload:
+        if payload["pnl_invented"] is not False:
+            raise ValueError("invalid_pnl_invented")
+        sanitized["pnl_invented"] = False
+
+    return sanitized
+
+
+def _append_recovery_receipt(
+    path: Path,
+    payload: Mapping[str, Any],
+) -> None:
+    sanitized_payload = _sanitize_recovery_payload(payload)
+    receipt = {
+        "schema": ATOMIC_WRITE_SCHEMA,
+        "version": VERSION,
+        "observed_at_utc": datetime.now(timezone.utc).isoformat().replace(
+            "+00:00",
+            "Z",
+        ),
+    }
+    receipt.update(sanitized_payload)
+
+    if not set(receipt).issubset(RECOVERY_RECEIPT_FIELDS):
+        raise ValueError("recovery_receipt_field_violation")
+
+    rendered = json.dumps(
+        receipt,
+        sort_keys=True,
+        allow_nan=False,
+    ) + "\n"
+    target = _recovery_path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a", encoding="utf-8") as stream:
+        stream.write(rendered)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def atomic_write_json(
+    path: Path,
+    payload: Any,
+    *,
+    preserve_last_known_good: bool = True,
+) -> None:
+    """Atomically persist validated JSON and retain one validated recovery copy."""
+    rendered = stable_json_bytes(payload)
+    backup = path.with_name(f"{path.name}.lkg")
+
+    if preserve_last_known_good and path.exists():
+        captured_current = path.read_bytes()
+        if _valid_json_bytes(captured_current):
+            _atomic_replace_bytes(backup, captured_current)
+
+    _atomic_replace_bytes(path, rendered)
+
+    if preserve_last_known_good and not backup.exists():
+        _atomic_replace_bytes(backup, rendered)
+
+
+def atomic_write_text(path: Path, payload: str) -> None:
+    if not isinstance(payload, str):
+        raise TypeError("text_payload_required")
+    _atomic_replace_bytes(path, payload.encode("utf-8"))
+
+
+def load_json_recoverable(
+    path: Path,
+    *,
+    default: Any = None,
+    expected_type: type | tuple[type, ...] | None = None,
+) -> Any:
+    """Load current JSON or recover only from a validated last-known-good copy."""
+    if not path.exists():
+        return default
+
+    captured_current: bytes | None = None
+    captured_sha256: str | None = None
+    original_read_error: str | None = None
+
+    try:
+        # This is the only read of the current file. Hashing and parsing both
+        # operate on this exact immutable byte capture.
+        captured_current = path.read_bytes()
+        captured_sha256 = hashlib.sha256(captured_current).hexdigest()
+        current = json.loads(captured_current.decode("utf-8"))
+        if expected_type is not None and not isinstance(current, expected_type):
+            raise ValueError("unexpected_json_type")
+        return current
+    except OSError:
+        # Never retain an exception message because it may contain paths,
+        # credential markers, broker data, or other private context.
+        original_read_error = "OSERROR"
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+        pass
+
+    backup = path.with_name(f"{path.name}.lkg")
+    try:
+        captured_backup = backup.read_bytes()
+        recovered = json.loads(captured_backup.decode("utf-8"))
+        if expected_type is not None and not isinstance(recovered, expected_type):
+            raise ValueError("unexpected_backup_json_type")
+    except (
+        OSError,
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+        ValueError,
+    ) as backup_exc:
+        raise ValueError(
+            f"JSON_RECOVERY_FAILED:{path.name}:current_and_backup_invalid"
+        ) from backup_exc
+
+    atomic_write_json(
+        path,
+        recovered,
+        preserve_last_known_good=False,
+    )
+    _append_recovery_receipt(
+        path,
+        {
+            "status": "RECOVERED_FROM_LAST_KNOWN_GOOD",
+            "invalid_current_sha256": captured_sha256 or "UNAVAILABLE",
+            "invalid_current_byte_count": (
+                len(captured_current)
+                if captured_current is not None
+                else "UNAVAILABLE"
+            ),
+            "original_read_error": original_read_error,
+            "trades_invented": 0,
+            "pnl_invented": False,
+        },
+    )
+    return recovered
+
+
+def append_jsonl_recoverable(
+    path: Path,
+    payload: Mapping[str, Any],
+) -> None:
+    """Append one durable JSONL record after quarantining only a torn final line."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    captured_current = b""
+    truncated_final: bytes | None = None
+
+    if path.exists():
+        captured_current = path.read_bytes()
+        raw_lines = captured_current.splitlines(keepends=True)
+        valid_lines: list[bytes] = []
+
+        for index, raw_line in enumerate(raw_lines):
+            stripped = raw_line.strip()
+            if not stripped:
+                continue
+            try:
+                json.loads(stripped.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                if index != len(raw_lines) - 1:
+                    raise ValueError("JSONL_MIDDLE_RECORD_CORRUPT") from error
+                truncated_final = raw_line
+                break
+            valid_lines.append(stripped + b"\n")
+
+        if truncated_final is not None:
+            _atomic_replace_bytes(path, b"".join(valid_lines))
+            _append_recovery_receipt(
+                path,
+                {
+                    "status": "TRUNCATED_FINAL_JSONL_QUARANTINED",
+                    "quarantined_sha256": hashlib.sha256(
+                        truncated_final
+                    ).hexdigest(),
+                    "retained_records": len(valid_lines),
+                    "trades_invented": 0,
+                    "pnl_invented": False,
+                },
+            )
+
+    separator = b""
+    if truncated_final is None and captured_current and not captured_current.endswith(b"\n"):
+        separator = b"\n"
+
+    rendered = json.dumps(
+        dict(payload),
+        sort_keys=True,
+        allow_nan=False,
+    ) + "\n"
+    with path.open("ab") as stream:
+        stream.write(separator + rendered.encode("utf-8"))
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def _utc_timestamp(value: Any) -> datetime | None:
@@ -180,7 +497,7 @@ def _as_of(records: Sequence[Mapping[str, Any]]) -> datetime:
 
 
 def _read_records(input_path: Path) -> tuple[list[Any], list[dict[str, Any]]]:
-    payload = json.loads(input_path.read_text(encoding="utf-8"))
+    payload = load_json_recoverable(input_path)
     if isinstance(payload, list):
         return payload, []
     if isinstance(payload, Mapping) and isinstance(payload.get("records"), list):
@@ -191,7 +508,7 @@ def _read_records(input_path: Path) -> tuple[list[Any], list[dict[str, Any]]]:
 def _load_ledger(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {"version": VERSION, "records": [], **SAFETY_FLAGS}
-    ledger = json.loads(path.read_text(encoding="utf-8"))
+    ledger = load_json_recoverable(path, expected_type=Mapping)
     if not isinstance(ledger, Mapping) or not isinstance(ledger.get("records"), list):
         raise ValueError("invalid_existing_ledger")
     if any(ledger.get(key) is not False for key in SAFETY_FLAGS):
@@ -200,8 +517,7 @@ def _load_ledger(path: Path) -> dict[str, Any]:
 
 
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+    atomic_write_json(path, payload)
 
 
 def run_pipeline(input_path: Path, ledger_path: Path, state_path: Path, report_path: Path) -> dict[str, Any]:
@@ -248,8 +564,7 @@ def run_pipeline(input_path: Path, ledger_path: Path, state_path: Path, report_p
     }
     _write_json(ledger_path, ledger)
     _write_json(state_path, state)
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(result_to_markdown(state), encoding="utf-8")
+    atomic_write_text(report_path, result_to_markdown(state))
     return state
 
 

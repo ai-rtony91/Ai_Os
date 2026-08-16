@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import uuid
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -11,6 +13,23 @@ from automation.forex_engine.forex_p1_supervised_paper_campaign_v1 import Campai
 from automation.forex_engine.oanda_read_only_client import OandaReadOnlyClient
 
 NOW = datetime(2026, 8, 10, 10, 30, tzinfo=timezone.utc)
+
+
+def _write_legacy_lock(
+    path, *, pid=101, owner="legacy-owner", heartbeat=NOW, status="ACTIVE"
+):
+    path.write_text(
+        json.dumps(
+            {
+                "schema": runtime.SUPER_TREND_LOCK_SCHEMA,
+                "status": status,
+                "owner": owner,
+                "pid": pid,
+                "heartbeat_at_utc": runtime._stamp(heartbeat),
+            }
+        ),
+        encoding="utf-8",
+    )
 
 
 def candles():
@@ -201,54 +220,265 @@ def test_supertrend_lock_acquisition_and_release_in_tmp_directory(tmp_path):
     lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
     first = NOW
     assert runtime._read_lock_record(lock_path) is None
-    assert runtime._acquire_supertrend_lock(lock_path, now=first) is True
+    owner = runtime._acquire_supertrend_lock(
+        lock_path,
+        now=first,
+        pid=101,
+        process_start_identity="pid-101",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        process_start_reader=lambda target: f"pid-{target}",
+    )
+    assert owner is not None
     assert lock_path.exists()
     try:
         record = runtime._read_lock_record(lock_path)
         assert record is not None
         assert record["status"] == "ACTIVE"
-        assert record["pid"] == os.getpid()
+        assert record["pid"] == 101
     finally:
-        runtime._release_supertrend_lock(lock_path)
+        runtime._release_supertrend_lock(lock_path, owner)
     assert not lock_path.exists()
 
 
 def test_supertrend_lock_touches_heartbeat_for_owned_lock(tmp_path):
     lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
-    assert runtime._acquire_supertrend_lock(lock_path, now=NOW) is True
+    owner = runtime._acquire_supertrend_lock(
+        lock_path,
+        now=NOW,
+        pid=101,
+        process_start_identity="pid-101",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        process_start_reader=lambda target: f"pid-{target}",
+    )
+    assert owner is not None
     try:
-        runtime._touch_supertrend_lock(lock_path, now=NOW + timedelta(minutes=1))
+        assert runtime._touch_supertrend_lock(
+            lock_path,
+            owner,
+            now=NOW + timedelta(minutes=1),
+        ) is True
         record = runtime._read_lock_record(lock_path)
         assert record is not None
         assert record["heartbeat_at_utc"] == runtime._stamp(NOW + timedelta(minutes=1))
     finally:
-        runtime._release_supertrend_lock(lock_path)
+        runtime._release_supertrend_lock(lock_path, owner)
 
 
 def test_supertrend_lock_release_only_removes_owned_lock(tmp_path):
     lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
-    try:
-        runtime._write_lock_record(
-            lock_path,
-            runtime._supertrend_lock_record(
-                heartbeat_utc=runtime._stamp(NOW),
-                pid=999,
-                owner="non_owner_runtime",
-            ),
-        )
-        runtime._release_supertrend_lock(lock_path)
-        assert lock_path.exists()
-    finally:
-        lock_path.unlink(missing_ok=True)
+    owner = runtime._acquire_supertrend_lock(
+        lock_path,
+        now=NOW,
+        pid=101,
+        process_start_identity="pid-101",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        process_start_reader=lambda target: f"pid-{target}",
+    )
+    assert owner is not None
+    wrong_owner = replace(owner, lock_id=str(uuid.uuid4()))
+    assert runtime._release_supertrend_lock(lock_path, wrong_owner) is False
+    assert lock_path.exists()
+    assert runtime._release_supertrend_lock(lock_path, owner) is True
 
 
 def test_supertrend_lock_double_acquire_returns_false_for_active_lock(tmp_path):
     lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
-    assert runtime._acquire_supertrend_lock(lock_path, now=NOW) is True
+    owner = runtime._acquire_supertrend_lock(
+        lock_path,
+        now=NOW,
+        pid=101,
+        process_start_identity="pid-101",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        process_start_reader=lambda target: f"pid-{target}",
+    )
+    assert owner is not None
     try:
         original_record = runtime._read_lock_record(lock_path)
         assert original_record is not None
-        assert runtime._acquire_supertrend_lock(lock_path, now=NOW) is False
+        assert runtime._acquire_supertrend_lock(
+            lock_path,
+            now=NOW,
+            pid=202,
+            process_start_identity="pid-202",
+            host_identity="test-host",
+            boot_identity="boot-a",
+            process_start_reader=lambda target: f"pid-{target}",
+        ) is None
         assert runtime._read_lock_record(lock_path) == original_record
     finally:
-        runtime._release_supertrend_lock(lock_path)
+        runtime._release_supertrend_lock(lock_path, owner)
+
+
+def test_legacy_live_owner_remains_blocking(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    _write_legacy_lock(lock_path)
+
+    assert runtime._acquire_supertrend_lock(
+        lock_path,
+        now=NOW,
+        pid=202,
+        process_start_identity="pid-202",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        process_start_reader=lambda _pid: "legacy-live",
+    ) is None
+    assert runtime._read_lock_record(lock_path)["owner"] == "legacy-owner"
+
+
+def test_legacy_dead_owner_is_recovered_and_upgraded(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    _write_legacy_lock(lock_path, heartbeat=NOW - timedelta(hours=1))
+
+    def missing(_pid):
+        raise ProcessLookupError
+
+    owner = runtime._acquire_supertrend_lock(
+        lock_path,
+        now=NOW,
+        pid=202,
+        process_start_identity="pid-202",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        process_start_reader=missing,
+    )
+    assert owner is not None
+    try:
+        record = runtime._read_lock_record(lock_path)
+        assert record is not None
+        assert set(record) == {
+            "schema",
+            "version",
+            "status",
+            "lock_id",
+            "pid",
+            "process_start_identity",
+            "host_identity",
+            "boot_identity",
+            "acquired_at_utc",
+            "heartbeat_at_utc",
+            "expires_at_utc",
+            "campaign_identity",
+            "source_fingerprint",
+        }
+        assert record["pid"] == 202
+    finally:
+        runtime._release_supertrend_lock(lock_path, owner)
+
+
+def test_malformed_legacy_lock_remains_blocked(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    _write_legacy_lock(lock_path, status="INACTIVE")
+
+    with pytest.raises(ValueError, match="RUNTIME_LOCK_METADATA_INVALID"):
+        runtime._acquire_supertrend_lock(
+            lock_path,
+            now=NOW,
+            pid=202,
+            process_start_identity="pid-202",
+            host_identity="test-host",
+            boot_identity="boot-a",
+            process_start_reader=lambda _pid: "legacy-live",
+        )
+    assert lock_path.exists()
+
+
+def test_upgraded_legacy_lock_can_be_read_repeatedly(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    _write_legacy_lock(lock_path, heartbeat=NOW - timedelta(hours=1))
+
+    def missing(_pid):
+        raise ProcessLookupError
+
+    owner = runtime._acquire_supertrend_lock(
+        lock_path,
+        now=NOW,
+        pid=202,
+        process_start_identity="pid-202",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        process_start_reader=missing,
+    )
+    assert owner is not None
+    try:
+        first = runtime._read_lock_record(lock_path)
+        second = runtime._read_lock_record(lock_path)
+        assert first == second
+        assert first["lock_id"] == owner.lock_id
+    finally:
+        runtime._release_supertrend_lock(lock_path, owner)
+
+
+def test_legacy_lock_cannot_be_released_by_replacement_owner(tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    _write_legacy_lock(lock_path)
+    replacement = runtime.RuntimeLockOwnership(
+        schema=runtime.SUPER_TREND_LOCK_SCHEMA,
+        lock_id=str(uuid.uuid4()),
+        pid=202,
+        process_start_identity="pid-202",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        campaign_identity=runtime.SUPER_TREND_LOCK_CAMPAIGN_IDENTITY,
+        source_fingerprint="a" * 64,
+    )
+
+    assert runtime._release_supertrend_lock(lock_path, replacement) is False
+    assert lock_path.exists()
+
+
+def test_supertrend_inner_lock_exception_path_releases_owner(monkeypatch, tmp_path):
+    lock_path = tmp_path / "isolated.supertrend.paper.runtime.lock"
+    owner = runtime.RuntimeLockOwnership(
+        schema=runtime.SUPER_TREND_LOCK_SCHEMA,
+        lock_id=str(uuid.uuid4()),
+        pid=101,
+        process_start_identity="pid-101",
+        host_identity="test-host",
+        boot_identity="boot-a",
+        campaign_identity=runtime.SUPER_TREND_LOCK_CAMPAIGN_IDENTITY,
+        source_fingerprint="a" * 64,
+    )
+    released = []
+    monkeypatch.setattr(runtime, "_acquire_supertrend_lock", lambda *_args, **_kwargs: owner)
+    monkeypatch.setattr(
+        runtime,
+        "_release_supertrend_lock",
+        lambda path, selected: released.append((path, selected)) or True,
+    )
+    monkeypatch.setattr(runtime, "_touch_supertrend_lock", lambda *_args, **_kwargs: True)
+    monkeypatch.setattr(
+        runtime,
+        "_capture",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("SANITIZED_CAPTURE_FAILURE")),
+    )
+    with pytest.raises(RuntimeError, match="SANITIZED_CAPTURE_FAILURE"):
+        list(
+            runtime.completed_paper_records(
+                client([]),
+                cycles=1,
+                reviewer_identity="Anthony",
+                runtime_path=tmp_path / "active.json",
+                runtime_lock_path=lock_path,
+                now=lambda: NOW,
+                sleep=lambda _seconds: None,
+                signal_source=runtime.SUPERTREND_SIGNAL_SOURCE,
+                supertrend_paper_demo_only=True,
+            )
+        )
+    assert released == [(lock_path, owner)]
+
+
+def test_supertrend_inner_lock_preserves_practice_get_only_boundary():
+    state = runtime.runtime_safety_state(
+        runtime.SUPERTREND_SIGNAL_SOURCE,
+        supertrend_paper_demo_only=True,
+    )
+    assert state["environment"] == "PRACTICE"
+    assert state["http_methods"] == ["GET"]
+    assert state["broker_write_performed"] is False
+    assert state["practice_order_performed"] is False
+    assert state["live_trade_performed"] is False

@@ -64,23 +64,34 @@ def parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Required with --signal-source supertrend; grants no order authority.",
     )
+    result.add_argument(
+        "--output-root",
+        type=Path,
+        default=REPORTS,
+        help=(
+            "Evidence output directory; manual runs retain Reports/forex_delivery "
+            "by default."
+        ),
+    )
     result.add_argument("--kill-switch-file", type=Path, default=ROOT / ".aios/runtime/forex/kill_switch.active")
     result.add_argument("--risk-halt-file", type=Path, default=ROOT / ".aios/runtime/forex/risk_halt.active")
     result.add_argument("--cancel-file", type=Path, default=ROOT / ".aios/runtime/forex/cancel_campaign.active")
     return result
 
 
-def campaign_paths_for_signal_source(signal_source: str) -> CampaignPaths:
+def campaign_paths_for_signal_source(
+    signal_source: str, output_root: Path = REPORTS
+) -> CampaignPaths:
     if signal_source == SUPERTREND_SIGNAL_SOURCE:
-        return supertrend_campaign_paths(REPORTS)
+        return supertrend_campaign_paths(output_root)
     return CampaignPaths(
-        candidate=REPORTS / ".p1_campaign_candidate.tmp",
-        ledger=REPORTS / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_LEDGER.json",
-        replay_state=REPORTS / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_REPLAY_STATE.json",
-        replay_report=REPORTS / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_REPLAY_REPORT.md",
-        event_log=REPORTS / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_EVENTS.jsonl",
-        campaign_state=REPORTS / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_STATE.json",
-        campaign_report=REPORTS / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_REPORT.md",
+        candidate=output_root / ".p1_campaign_candidate.tmp",
+        ledger=output_root / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_LEDGER.json",
+        replay_state=output_root / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_REPLAY_STATE.json",
+        replay_report=output_root / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_REPLAY_REPORT.md",
+        event_log=output_root / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_EVENTS.jsonl",
+        campaign_state=output_root / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_STATE.json",
+        campaign_report=output_root / "AIOS_FOREX_P1_30_TRADE_CAMPAIGN_V1_REPORT.md",
     )
 
 
@@ -111,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
     client = OandaReadOnlyClient(
         api_token=token, account_id=account, environment="practice"
     )
-    paths = campaign_paths_for_signal_source(selected_signal_source)
+    paths = campaign_paths_for_signal_source(selected_signal_source, args.output_root)
     runtime_path, runtime_lock_path = runtime_paths_for_signal_source(
         selected_signal_source
     )
