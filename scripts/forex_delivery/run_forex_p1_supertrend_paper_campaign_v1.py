@@ -338,6 +338,7 @@ def run_supertrend_campaign(
     if validation["validation_status"] != "PASS":
         raise ValueError("supertrend_campaign_validation_blocked:" + ";".join(validation["blockers"]))
     root = _outside_repository(output_root, repository_root)
+    root.mkdir(parents=True, exist_ok=True)
     paths = campaign_paths(root)
     state = run_campaign(
         (_normalize_record(item) for item in items),

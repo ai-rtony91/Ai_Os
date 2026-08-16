@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,6 +17,14 @@ from automation.forex_engine.forex_p1_eurusd_m5_history_capture_v1 import (
 )
 from automation.forex_engine.forex_p1_eurusd_market_history_signal_v1 import (
     build_signal_state,
+)
+from automation.forex_engine.forex_p1_paper_autostart_v1 import (
+    RuntimeLockOwnership,
+    acquire_runtime_lock,
+    read_runtime_lock,
+    refresh_runtime_lock,
+    release_runtime_lock,
+    source_fingerprint,
 )
 from automation.forex_engine.forex_p1_oanda_practice_snapshot_capture_v1 import (
     extract_sanitized_price_snapshot,
@@ -54,6 +61,8 @@ DATA_UNAVAILABLE_BACKOFF_BASE_SECONDS = 30
 DATA_UNAVAILABLE_BACKOFF_MAX_SECONDS = POLL_INTERVAL_SECONDS
 SUPER_TREND_LOCK_PATH_SUFFIX = ".supertrend.paper.runtime.lock"
 SUPER_TREND_LOCK_TTL_SECONDS = 300
+SUPER_TREND_LOCK_SCHEMA = "AIOS_FOREX_SUPERTREND_PRACTICE_SESSION_LOCK.v1"
+SUPER_TREND_LOCK_CAMPAIGN_IDENTITY = "FOREX_P1_SUPERTREND_PRACTICE_RUNTIME_V1"
 SUPER_TREND_SESSION_STRATEGY = SUPERTREND_PULLBACK_V1
 SUPER_TREND_SESSION_GUARD_REASON = "ACTIVE_SESSION_STRATEGY_MISMATCH"
 DEFAULT_PAPER_UNITS = 100
@@ -102,97 +111,44 @@ def _data_unavailable_backoff_seconds(consecutive_failures: int) -> int:
     )
 
 
-def _parse_utc(value: str) -> datetime:
-    if not isinstance(value, str):
-        raise ValueError("lock_utc_timestamp_invalid")
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
-    except ValueError as exc:
-        raise ValueError("lock_utc_timestamp_invalid") from exc
-
-
 def _lock_path(runtime_path: Path) -> Path:
     return runtime_path.with_name(runtime_path.name + SUPER_TREND_LOCK_PATH_SUFFIX)
 
 
-def _supertrend_lock_record(
-    *, heartbeat_utc: str, pid: int, owner: str
-) -> dict[str, Any]:
-    return {
-        "schema": "AIOS_FOREX_SUPERTREND_PRACTICE_SESSION_LOCK.v1",
-        "status": "ACTIVE",
-        "owner": owner,
-        "pid": pid,
-        "heartbeat_at_utc": heartbeat_utc,
-    }
+def _runtime_source_fingerprint() -> str:
+    return source_fingerprint(Path(__file__))
 
 
 def _read_lock_record(lock_path: Path) -> dict[str, Any] | None:
-    if not lock_path.exists():
-        return None
-    try:
-        raw = json.loads(lock_path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return None
-    if not isinstance(raw, Mapping):
-        return None
-    return dict(raw)
-
-
-def _is_lock_stale(payload: Mapping[str, Any], *, now: datetime) -> bool:
-    if payload.get("schema") != "AIOS_FOREX_SUPERTREND_PRACTICE_SESSION_LOCK.v1":
-        return True
-    if str(payload.get("status", "")).upper() != "ACTIVE":
-        return True
-    heartbeat = _parse_utc(payload.get("heartbeat_at_utc", ""))
-    return (now - heartbeat).total_seconds() > SUPER_TREND_LOCK_TTL_SECONDS
-
-
-def _write_lock_record(lock_path: Path, payload: Mapping[str, Any]) -> None:
-    lock_path.parent.mkdir(parents=True, exist_ok=True)
-    lock_path.write_text(
-        json.dumps(payload, sort_keys=True, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
+    return read_runtime_lock(
+        lock_path, schema=SUPER_TREND_LOCK_SCHEMA,
+        campaign_identity=SUPER_TREND_LOCK_CAMPAIGN_IDENTITY,
+        source_fingerprint_value=_runtime_source_fingerprint(),
     )
 
 
-def _acquire_supertrend_lock(lock_path: Path, *, now: datetime) -> bool:
-    existing = _read_lock_record(lock_path)
-    if existing is not None:
-        try:
-            is_stale = _is_lock_stale(existing, now=now)
-        except ValueError:
-            is_stale = True
-        if not is_stale:
-            return False
-        lock_path.unlink(missing_ok=True)
-    _write_lock_record(
-        lock_path,
-        _supertrend_lock_record(
-            heartbeat_utc=_stamp(now),
-            pid=os.getpid(),
-            owner="forex_p1_supertrend_practice_runtime",
-        ),
+def _acquire_supertrend_lock(
+    lock_path: Path, *, now: datetime, **identity_overrides: Any,
+) -> RuntimeLockOwnership | None:
+    return acquire_runtime_lock(
+        lock_path, schema=SUPER_TREND_LOCK_SCHEMA,
+        campaign_identity=SUPER_TREND_LOCK_CAMPAIGN_IDENTITY,
+        source_fingerprint_value=_runtime_source_fingerprint(),
+        ttl_seconds=SUPER_TREND_LOCK_TTL_SECONDS, now=now,
+        **identity_overrides,
     )
-    return True
 
 
-def _release_supertrend_lock(lock_path: Path) -> None:
-    existing = _read_lock_record(lock_path)
-    if existing is None:
-        return
-    if existing.get("pid") == os.getpid():
-        lock_path.unlink(missing_ok=True)
+def _release_supertrend_lock(lock_path: Path, owner: RuntimeLockOwnership) -> bool:
+    return release_runtime_lock(lock_path, owner)
 
 
-def _touch_supertrend_lock(lock_path: Path, *, now: datetime) -> None:
-    existing = _read_lock_record(lock_path)
-    if not existing:
-        return
-    existing["heartbeat_at_utc"] = _stamp(now)
-    existing["status"] = "ACTIVE"
-    existing["pid"] = os.getpid()
-    _write_lock_record(lock_path, existing)
+def _touch_supertrend_lock(
+    lock_path: Path, owner: RuntimeLockOwnership, *, now: datetime,
+) -> bool:
+    return refresh_runtime_lock(
+        lock_path, owner, ttl_seconds=SUPER_TREND_LOCK_TTL_SECONDS, now=now,
+    )
 
 
 def _close_active_session(runtime_path: Path, *, closed_at_utc: str, exit_reason: str) -> None:
@@ -472,21 +428,24 @@ def completed_paper_records(
     resolve_canonical_practice_transport(client)
     consecutive_data_unavailable = 0
     supertrend_lock_path = runtime_lock_path or _lock_path(runtime_path)
-    lock_acquired = False
+    lock_owner: RuntimeLockOwnership | None = None
 
     if selected_signal_source == SUPERTREND_SIGNAL_SOURCE:
-        if not _acquire_supertrend_lock(
+        lock_owner = _acquire_supertrend_lock(
             supertrend_lock_path,
             now=_utc_now(),
-        ):
+        )
+        if lock_owner is None:
             yield CampaignHalt("LIVE_WRITER_LOCK_HELD")
             return
-        lock_acquired = True
 
     try:
         for index in range(cycles):
-            if lock_acquired:
-                _touch_supertrend_lock(supertrend_lock_path, now=_utc_now())
+            if lock_owner is not None and not _touch_supertrend_lock(
+                supertrend_lock_path, lock_owner, now=_utc_now()
+            ):
+                yield CampaignHalt("LIVE_WRITER_LOCK_LOST")
+                return
             if owner_cancelled():
                 yield CampaignHalt("OWNER_CANCELLATION")
                 return
@@ -604,8 +563,8 @@ def completed_paper_records(
             if index + 1 < cycles:
                 sleep(POLL_INTERVAL_SECONDS)
     finally:
-        if lock_acquired:
-            _release_supertrend_lock(supertrend_lock_path)
+        if lock_owner is not None:
+            _release_supertrend_lock(supertrend_lock_path, lock_owner)
 
     yield CampaignHalt("OWNER_SESSION_CYCLE_LIMIT")
 

@@ -399,6 +399,7 @@ def test_parser_defaults_to_sprint4_with_demo_flag_false():
     args = runtime_script.parser().parse_args([])
     assert args.signal_source == "sprint-4"
     assert args.supertrend_paper_demo_only is False
+    assert args.output_root == runtime_script.REPORTS
 
 
 def test_parser_accepts_supertrend_with_demo_gate():
@@ -409,6 +410,43 @@ def test_parser_accepts_supertrend_with_demo_gate():
     ])
     assert args.signal_source == "supertrend"
     assert args.supertrend_paper_demo_only is True
+
+
+def test_explicit_supertrend_output_root_routes_every_artifact_outside_reports(
+    tmp_path: Path,
+):
+    runtime_root = (
+        tmp_path / ".aios" / "runtime" / "forex_p1_supertrend_paper_sessions"
+    )
+
+    paths = runtime_script.campaign_paths_for_signal_source(
+        "supertrend", runtime_root
+    )
+
+    assert all(
+        path.parent == runtime_root
+        for path in (
+            paths.candidate,
+            paths.ledger,
+            paths.replay_state,
+            paths.replay_report,
+            paths.event_log,
+            paths.campaign_state,
+            paths.campaign_report,
+        )
+    )
+    assert all(
+        runtime_script.REPORTS not in path.parents
+        for path in (
+            paths.candidate,
+            paths.ledger,
+            paths.replay_state,
+            paths.replay_report,
+            paths.event_log,
+            paths.campaign_state,
+            paths.campaign_report,
+        )
+    )
 
 
 def test_parser_rejects_unsupported_signal_source():
@@ -483,7 +521,8 @@ def test_main_default_supervised_path_is_unmodified(monkeypatch):
         captured["cycles"] = kwargs["cycles"]
         return iter(())
 
-    def fake_campaign(*_args, **_kwargs):
+    def fake_campaign(_candidates, paths, **_kwargs):
+        captured["campaign_paths"] = paths
         return {"stop_reason": "OWNER_SESSION_CYCLE_LIMIT"}
 
     monkeypatch.setattr(runtime_script, "OandaReadOnlyClient", lambda *_args, **_kwargs: None)
@@ -494,3 +533,4 @@ def test_main_default_supervised_path_is_unmodified(monkeypatch):
     assert captured["signal_source"] == "sprint-4"
     assert captured["runtime_path"] == runtime_script.SUPERVISED_PRACTICE_SESSION_PATH
     assert captured["cycles"] == 288
+    assert captured["campaign_paths"].campaign_state.parent == runtime_script.REPORTS
