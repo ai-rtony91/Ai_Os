@@ -34,8 +34,12 @@ def _git_lines(repo_root: Path, args: list[str]) -> list[str]:
 
 
 def _current_branch(repo_root: Path) -> str:
-    lines = _git_lines(repo_root, ["branch", "--show-current"])
-    return lines[0] if lines else ""
+    lines = _git_lines(repo_root, ["status", "--short", "--branch"])
+    if not lines or not lines[0].startswith("## "):
+        return ""
+    status_body = lines[0][3:]
+    branch = status_body.split("...", 1)[0]
+    return branch.split(" [", 1)[0]
 
 
 def test_run_function_returns_classified_cleanup_plan() -> None:
