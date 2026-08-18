@@ -44,6 +44,7 @@ from automation.forex_engine.forex_p1_supervised_paper_session_v1 import (
     build_completed_trade_record,
     load_active_session,
     open_paper_session,
+    update_paper_session_extremes,
 )
 from automation.forex_engine.oanda_read_only_client import (
     OandaReadOnlyClient,
@@ -628,6 +629,7 @@ def completed_paper_records(
                         runtime_path,
                     )
             else:
+                active = update_paper_session_extremes(snapshot, runtime_path)
                 bid = float(snapshot["bid"])
                 if bid >= float(active["target_price"]) or bid <= float(active["stop_price"]):
                     reason = "paper_target" if bid >= float(active["target_price"]) else "paper_stop"
@@ -654,8 +656,10 @@ def completed_paper_records(
                                     round(float(record.get("realized_pl", 0.0)) / float(record["risk_amount"]), 8)
                                     if record.get("risk_amount") not in (None, 0) else None
                                 ),
-                                "mfe_price": None, "mfe_r": None, "mae_price": None, "mae_r": None,
-                                "time_to_mfe": None, "time_to_mae": None,
+                                "mfe_price": record.get("mfe_price"), "mfe_r": record.get("mfe_r"),
+                                "mae_price": record.get("mae_price"), "mae_r": record.get("mae_r"),
+                                "time_to_mfe": record.get("time_to_mfe_seconds"),
+                                "time_to_mae": record.get("time_to_mae_seconds"),
                                 "candidate_status": "NONE", "paper_eligible": False,
                                 "ask_geometry_status": "NOT_EVALUATED",
                             }))
