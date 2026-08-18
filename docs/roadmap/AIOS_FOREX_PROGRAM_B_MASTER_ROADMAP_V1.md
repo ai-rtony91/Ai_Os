@@ -32,8 +32,8 @@ roadmap status, current evidence wins and the roadmap must be reconciled.
 | Order | Bucket | Status | Dependency and evidence | Next condition |
 |---:|---|---|---|---|
 | 1 | Program B Bucket 1 — State and persistent monitor | COMPLETE | Persistent monitor merged in PR #1414, merge SHA `156172e7d813cac5e054fbf1280085c3ff0e75de` | Do not rerun without new evidence. |
-| 2 | Program B Bucket 2 — Trade accounting integrity / open-hold-close path | IN_PROGRESS | Active session and campaign evidence exist; deterministic accounting proof passed in isolated repair worktree, but repair is not merged. | Complete only after validated publication and current-runtime compatibility review. |
-| 3 | Program B Bucket 3 — 30 genuine qualifying PAPER trades | BLOCKED | Active session exists but qualifying count is `0/30`; depends on Bucket 2. | Resume after Bucket 2 is complete and the campaign is safely flat/resumable. |
+| 2 | Program B Bucket 2 — Trade accounting integrity / open-hold-close path | COMPLETE | Repair merged in PR #1416, merge SHA `73d519dd7aca747d0b8f88cf277068a421211215`; focused accounting/evidence tests passed and current PAPER runtime is flat/resumable. | Do not rerun without new evidence. |
+| 3 | Program B Bucket 3 — 30 genuine qualifying PAPER trades | BLOCKED | Active session is safely flat/resumable but qualifying count is `0/30`; depends on Bucket 2. | Resume the campaign after Bucket 2 completion. |
 | 4 | Program B Bucket 4 — Continuous Post-Mortem and shadow learning | NOT_STARTED | Depends on resolved closed-trade evidence from Bucket 3. | Begin after sufficient genuine closed trades exist. |
 | 5 | Program B Bucket 5 — 30-trade formal decision gate | NOT_STARTED | Depends on Bucket 3 and Bucket 4 evidence. | Begin after the 30-trade evidence set is complete. |
 
