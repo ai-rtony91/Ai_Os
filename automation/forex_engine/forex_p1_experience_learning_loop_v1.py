@@ -201,6 +201,13 @@ def event_from_cycle_record(record: Mapping[str, Any], *, git_commit: str, datas
         "target", "reward_risk_actual", "history_age_seconds", "snapshot_age_seconds", "active_position_status",
         "first_failed_gate", "all_failed_gates", "atr_distance_to_pass", "atr_distance_percent",
         "body_distance_to_pass", "price_distance_to_band", "spread_stop_distance_ratio", "buy_only_boundary")}
+    features.update({key: record.get(key) for key in (
+        "atr_percentile", "atr_slope", "atr_acceleration", "volatility_regime", "upper_wick_ratio", "lower_wick_ratio",
+        "close_location", "h1_bullish", "h1_supertrend_direction", "h1_atr_period", "h1_supertrend_multiplier",
+        "rsi", "rsi_period", "rsi_status", "pullback_depth", "pullback_depth_atr", "session_bucket", "utc_hour",
+        "day_of_week", "spread_rolling_mean_24h", "spread_quality_status", "hypothetical_slippage",
+        "risk_percent", "risk_budget", "daily_drawdown_percent", "news_blackout_status", "clock_integrity",
+        "bar_identity", "candidate_idempotency_key")})
     return build_experience_event(
         experience_id=experience_id, event_type=action, strategy_name=str(record.get("strategy_name") or "supertrend_pullback_v1"),
         strategy_config=record.get("strategy_config") if isinstance(record.get("strategy_config"), Mapping) else {},
