@@ -170,13 +170,46 @@ def test_practice_data_failure_halts_fail_closed(monkeypatch, tmp_path):
     assert not any(isinstance(item, dict) for item in result)
 
 
-def test_stale_or_invalid_data_halts_fail_closed(tmp_path):
+def test_stale_data_waits_and_campaign_remains_bounded(tmp_path):
     stale_now = NOW + timedelta(hours=1)
     result = list(runtime.completed_paper_records(
         client([pricing(1.1)]), cycles=1, reviewer_identity="Anthony",
         runtime_path=tmp_path / "active.json", now=lambda: stale_now, sleep=lambda _seconds: None,
     ))
-    assert result == [CampaignHalt("STALE_MARKET_DATA")]
+    assert result == [CampaignWait(
+        1, 1, action=runtime.WAIT_FOR_DATA,
+        observed_at_utc=runtime._stamp(stale_now),
+        rejection_reasons=("stale_history",),
+    ), CampaignHalt("OWNER_SESSION_CYCLE_LIMIT")]
+
+
+@pytest.mark.parametrize("reason", ["stale_history", "stale_snapshot"])
+def test_transient_stale_data_continues_and_records_sanitized_cycle(
+    monkeypatch, tmp_path, reason
+):
+    outcomes = iter([ValueError(reason), ({"status": "NO_SIGNAL"}, {"bid": 1.1, "ask": 1.1002})])
+
+    def injected_capture(*_args, **_kwargs):
+        outcome = next(outcomes)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+    monkeypatch.setattr(runtime, "_capture", injected_capture)
+    result = list(runtime.completed_paper_records(
+        client([]), cycles=2, reviewer_identity="Anthony",
+        runtime_path=tmp_path / "active.json", now=lambda: NOW,
+        sleep=lambda _seconds: None,
+    ))
+    assert result[0].action == runtime.WAIT_FOR_DATA
+    assert result[0].rejection_reason == reason
+    assert result[1].action == "WAIT_FOR_NEXT_CYCLE"
+    assert result[-1] == CampaignHalt("OWNER_SESSION_CYCLE_LIMIT")
+    lines = (tmp_path / "AIOS_FOREX_SUPERTREND_CYCLE_PROVENANCE.jsonl").read_text(
+        encoding="utf-8"
+    ).splitlines()
+    assert len(lines) == 2
+    assert all("api_token" not in line and "account_id" not in line for line in lines)
 
 
 def test_runtime_is_practice_get_only_and_safety_flags_false():

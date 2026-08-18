@@ -51,6 +51,8 @@ SUPERTREND_REJECTION_REASONS = (
     "volatility_filter_failed",
     "duplicate_position_guard",
     "data_unavailable",
+    "stale_history",
+    "stale_snapshot",
     "unknown_no_signal",
 )
 _SUPERTREND_REJECTION_REASON_SET = frozenset(SUPERTREND_REJECTION_REASONS)
