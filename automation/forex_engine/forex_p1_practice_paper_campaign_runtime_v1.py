@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
@@ -371,6 +371,19 @@ def _candidate_from_signal(signal: dict[str, Any], snapshot: dict[str, Any]) -> 
     return candidate
 
 
+def _ask_geometry(signal: Mapping[str, Any], snapshot: Mapping[str, Any]) -> str:
+    """Return the observable ask gate result without creating a candidate."""
+    if signal.get("status") != "BUY":
+        return "NOT_EVALUATED"
+    try:
+        stop = float(signal["stop_price"])
+        ask = float(snapshot["ask"])
+        target = float(signal["target_price"])
+    except (KeyError, TypeError, ValueError):
+        return "NOT_EVALUATED"
+    return "PASS" if stop < ask < target else "FAIL"
+
+
 def _capture(
     client: OandaReadOnlyClient,
     now: datetime,
@@ -389,7 +402,9 @@ def _capture(
     signal = _build_signal_state(
         history, generated_at_utc=_stamp(now), signal_source=signal_source
     )
+    pricing_started = _utc_now()
     pricing = transport.pricing((INSTRUMENT,))
+    pricing_responded = _utc_now()
     pricing_validation_time = (pricing_now or _utc_now)().astimezone(timezone.utc)
     snapshot = extract_sanitized_price_snapshot(
         pricing,
@@ -409,9 +424,10 @@ def _capture(
         )
     }
     session_snapshot["credentials_included"] = False
-    latest_close = datetime.fromisoformat(
-        history["last_observed_at_utc"].replace("Z", "+00:00")
+    latest_open = datetime.fromisoformat(
+        (candles[-1]["observed_at_utc"] if candles else history["last_observed_at_utc"]).replace("Z", "+00:00")
     )
+    latest_close = latest_open + timedelta(minutes=5)
     snapshot_observed = datetime.fromisoformat(
         session_snapshot["observed_at_utc"].replace("Z", "+00:00")
     )
@@ -420,10 +436,10 @@ def _capture(
         "history_get_count": 1, "pricing_get_count": 1,
         "history_request_start_utc": _stamp(history_started),
         "history_response_utc": _stamp(history_responded),
-        "pricing_request_start_utc": _stamp(history_responded),
-        "pricing_response_utc": _stamp(pricing_validation_time),
+        "pricing_request_start_utc": _stamp(pricing_started),
+        "pricing_response_utc": _stamp(pricing_responded),
         "latest_completed_candle_open_utc": candles[-1].get("observed_at_utc") if candles else None,
-        "latest_completed_candle_close_utc": history.get("last_observed_at_utc"),
+        "latest_completed_candle_close_utc": _stamp(latest_close),
         "history_age_seconds": max(0.0, (now - latest_close).total_seconds()),
         "snapshot_age_seconds": max(0.0, (pricing_validation_time - snapshot_observed).total_seconds()),
         "history_freshness_result": "FRESH", "snapshot_freshness_result": "FRESH",
@@ -522,7 +538,7 @@ def completed_paper_records(
                 if telemetry_output_root is not None:
                     append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
                         cycle_number=index + 1, maximum_cycles=cycles,
-                        cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                        cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(_utc_now()),
                         action=WAIT_FOR_DATA, rejection_reasons=("data_unavailable",),
                         next_check_in_seconds=next_wait_seconds))
                 if next_wait_seconds is not None:
@@ -544,7 +560,7 @@ def completed_paper_records(
                     if telemetry_output_root is not None:
                         append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
                             cycle_number=index + 1, maximum_cycles=cycles,
-                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(_utc_now()),
                             action=WAIT_FOR_DATA, rejection_reasons=(stale_reason,),
                             next_check_in_seconds=next_wait_seconds, stale_reason=stale_reason))
                     if next_wait_seconds is not None:
@@ -564,18 +580,23 @@ def completed_paper_records(
                 candidate = _candidate_from_signal(signal, snapshot)
                 if candidate is None:
                     next_wait_seconds = POLL_INTERVAL_SECONDS if index + 1 < cycles else None
+                    ask_geometry_status = _ask_geometry(signal, snapshot)
                     reasons = (
                         _supertrend_wait_reasons(signal, candidate)
                         if selected_signal_source == SUPERTREND_SIGNAL_SOURCE else ()
                     )
+                    telemetry_reasons = tuple(reasons or signal.get("rejection_reasons", []))
+                    if ask_geometry_status == "FAIL" and "ask_geometry_failed" not in telemetry_reasons:
+                        telemetry_reasons += ("ask_geometry_failed",)
                     if telemetry_output_root is not None:
                         append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
                             cycle_number=index + 1, maximum_cycles=cycles,
-                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
-                            action="NO_SIGNAL", signal=signal, snapshot=snapshot,
-                            rejection_reasons=reasons or signal.get("rejection_reasons", []),
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(_utc_now()),
+                            action=("ASK_GEOMETRY_FAILED" if ask_geometry_status == "FAIL" else "NO_SIGNAL"), signal=signal, snapshot=snapshot,
+                            rejection_reasons=telemetry_reasons,
                             next_check_in_seconds=next_wait_seconds,
-                            extra={"paper_session_event": "NONE", "candidate_status": "NONE"}))
+                            extra={"paper_session_event": "NONE", "candidate_status": "NONE",
+                                   "paper_eligible": False, "ask_geometry_status": ask_geometry_status}))
                     if selected_signal_source == SUPERTREND_SIGNAL_SOURCE:
                         yield CampaignWait(
                             index + 1,
@@ -593,11 +614,12 @@ def completed_paper_records(
                     if telemetry_output_root is not None:
                         append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
                             cycle_number=index + 1, maximum_cycles=cycles,
-                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(_utc_now()),
                             action="PAPER_SESSION_OPEN", signal=signal, snapshot=snapshot,
                             rejection_reasons=(), next_check_in_seconds=(
                                 POLL_INTERVAL_SECONDS if index + 1 < cycles else None
-                            ), extra={"paper_session_event": "OPEN", "candidate_status": "PAPER_ELIGIBLE"}))
+                            ), extra={"paper_session_event": "OPEN", "candidate_status": "PAPER_ELIGIBLE",
+                                      "paper_eligible": True, "ask_geometry_status": "PASS"}))
                     open_paper_session(
                         snapshot,
                         candidate,
@@ -615,7 +637,7 @@ def completed_paper_records(
                     if telemetry_output_root is not None:
                         append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
                             cycle_number=index + 1, maximum_cycles=cycles,
-                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(_utc_now()),
                             action="PAPER_SESSION_CLOSE", signal=signal, snapshot=snapshot,
                             rejection_reasons=(), extra={
                                 "paper_session_event": "CLOSE", "exit_reason": reason,
@@ -627,6 +649,8 @@ def completed_paper_records(
                                     else ("LOSS" if float(record.get("realized_pl", 0)) < 0 else "FLAT")
                                 ),
                                 "holding_duration_seconds": record.get("holding_duration_seconds"),
+                                "candidate_status": "NONE", "paper_eligible": False,
+                                "ask_geometry_status": "NOT_EVALUATED",
                             }))
                     _close_active_session(
                         runtime_path,
@@ -639,11 +663,12 @@ def completed_paper_records(
                     if telemetry_output_root is not None:
                         append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
                             cycle_number=index + 1, maximum_cycles=cycles,
-                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(_utc_now()),
                             action="PAPER_SESSION_HELD", signal=signal, snapshot=snapshot,
                             rejection_reasons=("duplicate_position_guard",),
                             next_check_in_seconds=next_wait_seconds,
-                            extra={"paper_session_event": "HELD", "candidate_status": "NONE"}))
+                            extra={"paper_session_event": "HELD", "candidate_status": "NONE",
+                                   "paper_eligible": False, "ask_geometry_status": "NOT_EVALUATED"}))
                     yield CampaignWait(
                         index + 1,
                         cycles,

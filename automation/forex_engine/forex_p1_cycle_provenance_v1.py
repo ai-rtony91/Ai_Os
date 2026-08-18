@@ -44,6 +44,7 @@ def build_cycle_record(
 ) -> dict[str, Any]:
     signal = signal or {}
     snapshot = snapshot or {}
+    extra_data = dict(extra or {})
     data = signal.get("provenance", {}) if isinstance(signal.get("provenance"), Mapping) else {}
     next_at = None
     if next_check_in_seconds is not None:
@@ -84,14 +85,34 @@ def build_cycle_record(
         "bid": snapshot.get("bid"), "ask": snapshot.get("ask"), "spread": snapshot.get("spread"),
         "stop_lt_ask": data.get("stop_lt_ask"), "ask_lt_target": data.get("ask_lt_target"),
         "duplicate_position_guard": data.get("duplicate_position_guard"), "active_position_status": data.get("active_position_status", "NONE"),
-        "candidate_status": "PAPER_ELIGIBLE" if signal.get("status") == "BUY" else "NONE",
-        "paper_eligible": signal.get("status") == "BUY", "cycle_action": action,
+        # A BUY is only a strategy signal.  It is not a paper candidate until
+        # the runtime has evaluated stop < ask < target and the session guards.
+        "candidate_status": extra_data.get("candidate_status", "NONE"),
+        "paper_eligible": bool(extra_data.get("paper_eligible", False)),
+        "signal_accepted": signal.get("status") == "BUY",
+        "ask_geometry_status": extra_data.get("ask_geometry_status", "NOT_EVALUATED"),
+        "paper_session_event": extra_data.get("paper_session_event", "NONE"),
+        "first_failed_gate": data.get("first_failed_gate"),
+        "all_failed_gates": data.get("all_failed_gates", list(rejection_reasons)),
+        "atr_distance_to_pass": data.get("atr_distance_to_pass"),
+        "atr_distance_percent": data.get("atr_distance_percent"),
+        "body_distance_to_pass": data.get("body_distance_to_pass"),
+        "price_distance_to_band": data.get("price_distance_to_band"),
+        "extension_atr_ratio": data.get("extension_atr_ratio"),
+        "spread_stop_distance_ratio": data.get("spread_stop_distance_ratio"),
+        "supertrend_value": data.get("supertrend_value"),
+        "bars_in_current_direction": data.get("bars_in_current_direction"),
+        "flip_this_cycle": data.get("flip_this_cycle"),
+        "recent_flip_count": data.get("recent_flip_count"),
+        "close_confirmation": data.get("close_confirmation", "NOT_EVALUATED"),
+        "buy_only_boundary": data.get("buy_only_boundary", "PASS"),
+        "cycle_action": action,
         "runtime_pid": run_pid or os.getpid(), "lock_owner_identity": lock_owner,
         "broker_write_performed": False, "practice_order_performed": False, "live_trade_performed": False,
         "money_movement_performed": False, "credentials_persisted": False,
     }
-    if extra:
-        record.update(dict(extra))
+    if extra_data:
+        record.update(extra_data)
     return _clean(record)
 
 
