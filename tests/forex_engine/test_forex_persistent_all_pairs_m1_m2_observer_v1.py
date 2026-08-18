@@ -54,7 +54,7 @@ def _accepted_evaluation(direction: str = "BUY"):
 
 def test_instrument_discovery_keeps_only_enabled_forex_pairs():
     result = observer.eligible_forex_instruments({"instruments": [
-        {"name": "EUR_USD", "type": "CURRENCY", "tradeable": True}, {"name": "USD_JPY", "type": "CURRENCY", "tradeable": False},
+        {"name": "EUR_USD", "type": "CURRENCY", "tradeable": True, "displayPrecision": 5, "pipLocation": -4}, {"name": "USD_JPY", "type": "CURRENCY", "tradeable": False},
         {"name": "XAU_USD", "type": "METAL", "tradeable": True}, {"name": "EUR_GBP", "type": "CURRENCY", "tradeable": True, "halted": True},
     ]})
     assert result["eligible_instruments"] == ["EUR_USD"]
@@ -164,13 +164,13 @@ def test_durable_evidence_rejects_secrets_and_observer_lock_is_isolated(tmp_path
     cycle = {"cycle_timestamp_utc": NOW.isoformat().replace("+00:00", "Z"), "paper_only": True}
     path = observer.write_cycle_evidence(tmp_path, cycle, owner=owner)
     assert json.loads((tmp_path / "heartbeat.json").read_text(encoding="utf-8"))["qualifying_trades"] == 0
-    assert path.name == "observer-events.jsonl"
+    assert path.name.startswith("observer-events-") and path.suffix == ".jsonl"
     assert observer.release_observer_lock(tmp_path, owner) is True
 
 
 def test_persistent_observer_rechecks_universe_and_uses_its_own_runtime_root(monkeypatch, tmp_path):
     client = OandaReadOnlyClient(api_token="private", account_id="private", environment="practice")
-    client.discover_instruments = lambda: {"instruments": [{"name": "EUR_USD", "type": "CURRENCY", "tradeable": True}]}
+    client.discover_instruments = lambda: {"instruments": [{"name": "EUR_USD", "type": "CURRENCY", "tradeable": True, "displayPrecision": 5, "pipLocation": -4}]}
     client.pricing = lambda instruments: {"prices": [_quote(item) for item in instruments]}
     client.observation_candles = lambda instrument, **kwargs: _candle_payload(instrument, kwargs["granularity"])
     monkeypatch.setattr(observer, "evaluate_supertrend_pullback", lambda *_args, **_kwargs: _accepted_evaluation())
@@ -202,3 +202,28 @@ def test_outcome_summary_never_awards_campaign_credit():
     bad = outcome("bad", "CLOSED", 1.0) | {"net_pl_usd": 0.9}
     with pytest.raises(ValueError, match="paper_outcome_net_pl_mismatch"):
         observer.validate_paper_outcome(bad)
+
+
+def test_hypothetical_exit_uses_buy_bid_and_keeps_zero_campaign_credit():
+    quote = observer.build_quote_snapshot(_quote(), instrument="EUR_USD", collected_at=NOW)
+    session = {
+        "observer_owned": True, "qualifying_credit": False, "candidate_id": "candidate-one", "direction": "BUY",
+        "entry": 1.1002, "stop": 1.0990, "target": 1.1003, "units": 100,
+        "opened_at_utc": (NOW - timedelta(seconds=60)).isoformat().replace("+00:00", "Z"),
+        "estimated_spread_cost_usd": 0.01,
+    }
+    result = observer.observe_hypothetical_exit(session, quote, observed_at=NOW)
+    assert result["exit_price"] == quote["bid"]
+    assert result["exit_reason"] == "HOLD"
+    assert result["qualifying_credit"] is False
+    assert result["holding_seconds"] == 60.0
+
+
+def test_evidence_rotation_is_bounded_and_crash_safe(tmp_path):
+    record = {"schema": observer.SCHEMA, "record_type": "OBSERVER_CYCLE", "paper_only": True, "payload": "x" * 2048}
+    first = observer.append_rotating_evidence(tmp_path, record, now=NOW, max_bytes=1024, retention_files=2)
+    second = observer.append_rotating_evidence(tmp_path, record, now=NOW, max_bytes=1024, retention_files=2)
+    third = observer.append_rotating_evidence(tmp_path, record, now=NOW + timedelta(days=1), max_bytes=1024, retention_files=2)
+    assert first != second and second != third
+    assert len(list(tmp_path.glob("observer-events-*.jsonl"))) == 2
+    assert third.read_text(encoding="utf-8").endswith("\n")
