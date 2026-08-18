@@ -58,6 +58,21 @@ SUPERTREND_REJECTION_REASONS = (
 _SUPERTREND_REJECTION_REASON_SET = frozenset(SUPERTREND_REJECTION_REASONS)
 
 
+def _new_york_timestamp(value: datetime) -> str:
+    """Render UTC using America/New_York rules without an external tzdata file."""
+    year = value.year
+    march_first = datetime(year, 3, 1, tzinfo=timezone.utc)
+    november_first = datetime(year, 11, 1, tzinfo=timezone.utc)
+    dst_start = march_first + timedelta(
+        days=(6 - march_first.weekday()) % 7 + 7, hours=7
+    )
+    dst_end = november_first + timedelta(
+        days=(6 - november_first.weekday()) % 7, hours=6
+    )
+    offset = timedelta(hours=-4 if dst_start <= value < dst_end else -5)
+    return value.astimezone(timezone(offset)).isoformat()
+
+
 @dataclass(frozen=True)
 class CampaignPaths:
     candidate: Path
@@ -140,6 +155,55 @@ def _active_position_snapshot(active_position: Any) -> str:
     if isinstance(active_position, Mapping):
         return json.dumps(active_position, sort_keys=True)
     return str(active_position)
+
+
+def load_active_position_projection(path: Path | None) -> dict[str, Any] | None:
+    """Read-only projection of the runtime's genuine open PAPER session.
+
+    The runtime session is authoritative for an open position; the campaign
+    ledger remains authoritative for completed qualifying trades.  Missing or
+    non-active sessions project to NONE.  A malformed ACTIVE session fails
+    closed so a status surface cannot display partial position evidence.
+    """
+    if path is None or not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("active_paper_session_invalid") from exc
+    if not isinstance(payload, Mapping):
+        raise ValueError("active_paper_session_invalid")
+    if payload.get("status") != "ACTIVE":
+        return None
+    required = (
+        "candidate_id", "strategy_name", "instrument", "direction",
+        "entry_timestamp", "entry_price", "stop_price", "target_price", "units",
+    )
+    if any(key not in payload or payload[key] in (None, "") for key in required):
+        raise ValueError("active_paper_session_incomplete")
+    entry_utc = _safe_utc(payload["entry_timestamp"])
+    if entry_utc is None:
+        raise ValueError("active_paper_session_entry_timestamp_invalid")
+    return {
+        "candidate_id": payload["candidate_id"],
+        "strategy": payload["strategy_name"],
+        "instrument": payload["instrument"],
+        "direction": payload["direction"],
+        "entry_timestamp_utc": entry_utc.isoformat().replace("+00:00", "Z"),
+        "entry_timestamp_new_york": _new_york_timestamp(entry_utc),
+        "entry_price": payload["entry_price"],
+        "stop": payload["stop_price"],
+        "target": payload["target_price"],
+        "units": payload["units"],
+    }
+
+
+def _apply_active_position_projection(
+    state: dict[str, Any], active_session_path: Path | None
+) -> None:
+    projection = load_active_position_projection(active_session_path)
+    state["active_position"] = projection
+    state["active_position_status"] = "ACTIVE" if projection is not None else "NONE"
 
 
 def _next_wait_display(wait: CampaignWait) -> tuple[str, str]:
@@ -240,6 +304,7 @@ def _initial_state(
         "qualifying_strategy_name": qualifying_strategy_name,
         "strategy_qualifying_trade_counts": {},
         "active_position": None,
+        "active_position_status": "NONE",
         "last_trade": None,
         "data_unavailable_count": 0,
         "last_data_unavailable_utc": None,
@@ -451,6 +516,8 @@ def _write_outputs(paths: CampaignPaths, state: Mapping[str, Any]) -> None:
         f"- DATA_UNAVAILABLE_COUNT: {state['data_unavailable_count']}",
         f"- LAST_DATA_UNAVAILABLE_UTC: {state['last_data_unavailable_utc'] or 'NONE'}",
         f"- LAST_ACTION: {state['last_action'] or 'NONE'}",
+        f"- ACTIVE_POSITION_STATUS: {state.get('active_position_status', 'NONE')}",
+        f"- ACTIVE_POSITION: {_active_position_snapshot(state.get('active_position'))}",
         f"- STOP_REASON: {state['stop_reason'] or 'NONE'}",
         f"- COMPLETED_UTC: {state['completed_utc'] or 'NONE'}",
         f"- NEXT_ACTION: {next_action}",
@@ -507,6 +574,7 @@ def run_campaign(
     risk_halt_active: bool = False,
     maximum_session_loss: float | None = None,
     qualifying_strategy_name: str | None = None,
+    active_session_path: Path | None = None,
 ) -> dict[str, Any]:
     """Capture up to 30 already-closed paper candidates, sequentially and fail closed."""
     started = _utc_now()
@@ -520,6 +588,7 @@ def run_campaign(
     state = _initial_state(started, qualifying_strategy_name)
     _restore_progress_state(state, previous_state, qualifying_strategy_name)
     _sync_trade_evidence(state, prior_records)
+    _apply_active_position_projection(state, active_session_path)
     stop_reason: str | None = None
     seen_this_run: set[str] = set()
 
@@ -576,6 +645,7 @@ def run_campaign(
                     candidate.observed_at_utc or updated_utc
                 )
             _mark_waiting_for_next_run(state, updated_utc)
+            _apply_active_position_projection(state, active_session_path)
             _write_outputs(paths, state)
             _wait_progress(candidate, state, output)
             continue
@@ -645,6 +715,7 @@ def run_campaign(
         _mark_waiting_for_next_run(state, final_updated_utc)
     else:
         _mark_terminal(state, stop_reason, final_updated_utc)
+    _apply_active_position_projection(state, active_session_path)
     _write_outputs(paths, state)
     paths.candidate.unlink(missing_ok=True)
     return state
