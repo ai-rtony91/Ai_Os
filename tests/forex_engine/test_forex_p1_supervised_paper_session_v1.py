@@ -78,6 +78,27 @@ def test_completed_trade_has_canonical_shape(tmp_path):
     assert record["evidence_type"] == "paper"
 
 
+def test_close_preserves_paper_excursion_and_holding_metrics(tmp_path):
+    runtime = tmp_path / "active.json"
+    open_one(runtime)
+    module.update_paper_session_extremes(
+        snapshot(observed_at_utc="2026-08-06T10:30:00Z", bid=1.1010,
+                 ask=1.1012, mid=1.1011), runtime
+    )
+    record = module.build_completed_trade_record(
+        module.load_active_session(runtime),
+        snapshot(observed_at_utc="2026-08-06T11:00:00Z", bid=1.1015,
+                 ask=1.1017, mid=1.1016),
+        "target", "Anthony", "2026-08-06T11:01:00Z"
+    )
+    assert record["holding_duration_seconds"] == 3600.0
+    assert record["mfe_price"] == 1.1015
+    assert record["mfe_r"] > 0
+    assert record["mae_price"] == 1.1
+    assert record["mae_r"] > 0
+    assert record["outcome_r"] > 0
+
+
 def test_abort_has_zero_credit_and_flags_false(tmp_path):
     path = tmp_path/"active.json"; open_one(path); result = module.abort_paper_session(path)
     assert result["p1_credit"] == 0 and not path.exists() and all(result[key] is False for key in module.SAFETY_FLAGS)

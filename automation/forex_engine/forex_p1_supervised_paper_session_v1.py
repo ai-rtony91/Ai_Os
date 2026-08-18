@@ -157,6 +157,9 @@ def open_paper_session(snapshot: Mapping[str, Any], candidate: Mapping[str, Any]
         "risk_amount": item["risk_amount"], "entry_rationale": item["entry_rationale"],
         "owner_supervision_confirmed": True, "reviewer_identity": reviewer_identity,
         "opened_as_of_utc": as_of_utc, **SAFETY_FLAGS,
+        "mfe_price": snap["bid"], "mae_price": snap["bid"],
+        "mfe_timestamp_utc": snap["observed_at_utc"],
+        "mae_timestamp_utc": snap["observed_at_utc"],
     }
     if "strategy_config" in item:
         session["strategy_config"] = item["strategy_config"]
@@ -167,6 +170,27 @@ def open_paper_session(snapshot: Mapping[str, Any], candidate: Mapping[str, Any]
     runtime_path.parent.mkdir(parents=True, exist_ok=True)
     runtime_path.write_text(stable_json(session), encoding="utf-8")
     return session
+
+
+def update_paper_session_extremes(snapshot: Mapping[str, Any], runtime_path: Path) -> dict[str, Any]:
+    """Persist observed BUY-side MFE/MAE inputs for the open session."""
+    active = load_active_session(runtime_path)
+    if not active:
+        raise ValueError("no_active_session")
+    snap = validate_market_snapshot(snapshot)
+    if snap["instrument"] != active["instrument"]:
+        raise ValueError("active_instrument_mismatch")
+    bid = snap["bid"]
+    mfe = float(active.get("mfe_price", bid))
+    mae = float(active.get("mae_price", bid))
+    if bid > mfe:
+        active["mfe_price"] = bid
+        active["mfe_timestamp_utc"] = snap["observed_at_utc"]
+    if bid < mae:
+        active["mae_price"] = bid
+        active["mae_timestamp_utc"] = snap["observed_at_utc"]
+    runtime_path.write_text(stable_json(active), encoding="utf-8")
+    return active
 
 
 def calculate_conservative_paper_result(session: Mapping[str, Any], closing_snapshot: Mapping[str, Any], fees: float = 0.0) -> dict[str, float]:
@@ -198,6 +222,29 @@ def build_completed_trade_record(session: Mapping[str, Any], closing_snapshot: M
     if "strategy_config" in session:
         base["strategy_config"] = dict(session["strategy_config"])
     base["trade_id"] = "p1-session-" + hashlib.sha256(json.dumps(base, sort_keys=True).encode()).hexdigest()[:24]
+    entry_time = _utc(session["entry_timestamp"])
+    exit_time = _utc(snap["observed_at_utc"])
+    risk = float(session["risk_amount"])
+    units = int(session["units"])
+    entry = float(result["entry_price"])
+    mfe_price = max(float(session.get("mfe_price", entry)), float(result["exit_price"]))
+    mae_price = min(float(session.get("mae_price", entry)), float(result["exit_price"]))
+    mfe_timestamp = session.get("mfe_timestamp_utc", session["entry_timestamp"])
+    mae_timestamp = session.get("mae_timestamp_utc", session["entry_timestamp"])
+    if float(result["exit_price"]) >= float(session.get("mfe_price", entry)):
+        mfe_timestamp = snap["observed_at_utc"]
+    if float(result["exit_price"]) <= float(session.get("mae_price", entry)):
+        mae_timestamp = snap["observed_at_utc"]
+    base.update({
+        "holding_duration_seconds": round((exit_time - entry_time).total_seconds(), 6),
+        "outcome_r": round(float(result["net_pl"]) / risk, 8) if risk else None,
+        "mfe_price": mfe_price,
+        "mae_price": mae_price,
+        "mfe_r": round((mfe_price - entry) * units / risk, 8) if risk else None,
+        "mae_r": round((entry - mae_price) * units / risk, 8) if risk else None,
+        "time_to_mfe_seconds": round((_utc(mfe_timestamp) - entry_time).total_seconds(), 6),
+        "time_to_mae_seconds": round((_utc(mae_timestamp) - entry_time).total_seconds(), 6),
+    })
     return base
 
 
