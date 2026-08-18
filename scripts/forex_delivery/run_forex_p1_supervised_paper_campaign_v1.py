@@ -144,6 +144,9 @@ def main(argv: list[str] | None = None) -> int:
         kill_switch_active=args.kill_switch_file.exists(),
         risk_halt_active=args.risk_halt_file.exists(),
         maximum_session_loss=args.maximum_session_loss,
+        active_session_path=(
+            runtime_path if selected_signal_source == SUPERTREND_SIGNAL_SOURCE else None
+        ),
         qualifying_strategy_name=(
             SUPERTREND_PULLBACK_V1
             if selected_signal_source == SUPERTREND_SIGNAL_SOURCE

@@ -50,6 +50,52 @@ def run(records, paths, **kwargs):
     return result, output.getvalue()
 
 
+def active_session_payload(**overrides):
+    payload = {
+        "status": "ACTIVE",
+        "candidate_id": "p1-runtime-test-candidate",
+        "strategy_name": SUPERTREND_PULLBACK_V1,
+        "instrument": "EUR_USD",
+        "direction": "BUY",
+        "entry_timestamp": "2026-08-18T13:39:24.520656351Z",
+        "entry_price": 1.15834,
+        "stop_price": 1.15693,
+        "target_price": 1.16011,
+        "units": 100,
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_active_runtime_session_projects_without_counting_a_trade(paths, tmp_path):
+    active = tmp_path / "active.json"
+    active.write_text(json.dumps(active_session_payload()), encoding="utf-8")
+    state, _ = run([], paths, active_session_path=active)
+    assert state["active_position_status"] == "ACTIVE"
+    assert state["active_position"]["candidate_id"] == "p1-runtime-test-candidate"
+    assert state["active_position"]["entry_timestamp_new_york"].startswith(
+        "2026-08-18T09:39:24"
+    )
+    assert state["active_position"]["entry_timestamp_utc"].startswith(
+        "2026-08-18T13:39:24"
+    )
+    assert state["accepted_qualifying_trades"] == 0
+    assert "ACTIVE_POSITION_STATUS: ACTIVE" in paths.campaign_report.read_text()
+
+
+def test_missing_closed_and_invalid_active_sessions_fail_closed(paths, tmp_path):
+    missing, _ = run([], paths, active_session_path=tmp_path / "missing.json")
+    assert missing["active_position_status"] == "NONE"
+    closed = tmp_path / "closed.json"
+    closed.write_text(json.dumps(active_session_payload(status="CLOSED")), encoding="utf-8")
+    state, _ = run([], paths, active_session_path=closed)
+    assert state["active_position_status"] == "NONE"
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text(json.dumps(active_session_payload(target_price=None)), encoding="utf-8")
+    with pytest.raises(ValueError, match="active_paper_session_incomplete"):
+        run([], paths, active_session_path=invalid)
+
+
 def test_campaign_reuses_long_run_limit_and_is_one_at_a_time(paths):
     assert TARGET_QUALIFYING_TRADES == LONG_RUN_LIMITS["max_session_trades"] == 30
     assert MAX_OPEN_PAPER_POSITIONS == 1
