@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from collections.abc import Iterator
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping
@@ -76,6 +78,12 @@ SPRINT_4_SIGNAL_SOURCE = "sprint-4"
 SUPERTREND_SIGNAL_SOURCE = "supertrend"
 SIGNAL_SOURCES = (SPRINT_4_SIGNAL_SOURCE, SUPERTREND_SIGNAL_SOURCE)
 SUPERTREND_CONFIG = SupertrendPullbackConfig()
+M5_RUNTIME_ROOT_RELATIVE_PATH = Path(
+    ".aios/runtime/forex_p1_supertrend_paper_sessions"
+)
+APPROVED_EXTERNAL_M5_RUNTIME_ROOT = Path(
+    r"C:\Dev\Ai.Os\.aios\runtime\forex_p1_supertrend_paper_sessions"
+)
 SAFETY = {
     "broker_write_performed": False,
     "practice_order_performed": False,
@@ -96,6 +104,78 @@ _SUPERTREND_RAW_REJECTION_REASON_MAP = {
     "volatility_below_atr_threshold": "volatility_filter_failed",
 }
 _SUPERTREND_REJECTION_REASON_SET = frozenset(SUPERTREND_REJECTION_REASONS)
+
+
+@dataclass(frozen=True)
+class M5RuntimePaths:
+    """One coherent, validated home for M5 PAPER runtime artifacts."""
+
+    root: Path
+    mode: str
+
+    @property
+    def active_session(self) -> Path:
+        return self.root / "active.json"
+
+    @property
+    def lock(self) -> Path:
+        return self.root / "active.json.runtime.lock"
+
+    @property
+    def heartbeat(self) -> Path:
+        return self.root / "heartbeat.json"
+
+    @property
+    def campaign_projection(self) -> Path:
+        return self.root / "AIOS_FOREX_SUPERTREND_30_TRADE_CAMPAIGN_STATE.json"
+
+    @property
+    def telemetry(self) -> Path:
+        return self.root / "AIOS_FOREX_SUPERTREND_CYCLE_PROVENANCE.jsonl"
+
+    @property
+    def recovery_receipt(self) -> Path:
+        return self.lock.with_name(f"{self.lock.name}.recovery.jsonl")
+
+
+def _normalized_path_text(path: Path) -> str:
+    return os.path.normcase(os.path.normpath(str(path)))
+
+
+def resolve_m5_runtime_paths(
+    *, checkout_root: Path, external_runtime_root: Path | None = None,
+) -> M5RuntimePaths:
+    """Return checkout-local paths or the sole approved external M5 root.
+
+    The external handoff is deliberately path-specific.  It cannot be used as
+    a general runtime-root override and is validated before any transport,
+    lock, session, or telemetry operation is constructed.
+    """
+    checkout_root = checkout_root.resolve(strict=True)
+    if external_runtime_root is None:
+        return M5RuntimePaths(
+            root=(checkout_root / M5_RUNTIME_ROOT_RELATIVE_PATH).resolve(strict=False),
+            mode="CHECKOUT_LOCAL",
+        )
+    if not external_runtime_root.is_absolute():
+        raise ValueError("external_m5_runtime_root_must_be_absolute")
+    if ".." in external_runtime_root.parts:
+        raise ValueError("external_m5_runtime_root_path_traversal_forbidden")
+
+    requested_text = _normalized_path_text(external_runtime_root)
+    approved_text = _normalized_path_text(APPROVED_EXTERNAL_M5_RUNTIME_ROOT)
+    if requested_text != approved_text:
+        raise ValueError("external_m5_runtime_root_not_allowlisted")
+    try:
+        approved_root = APPROVED_EXTERNAL_M5_RUNTIME_ROOT.resolve(strict=True)
+        resolved_root = external_runtime_root.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise ValueError("external_m5_runtime_root_missing") from exc
+    if not resolved_root.is_dir():
+        raise ValueError("external_m5_runtime_root_missing")
+    if resolved_root != approved_root:
+        raise ValueError("external_m5_runtime_root_symlink_escape")
+    return M5RuntimePaths(root=resolved_root, mode="APPROVED_EXTERNAL")
 
 
 def _utc_now() -> datetime:

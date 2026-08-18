@@ -18,10 +18,12 @@ from automation.forex_engine.forex_p1_supervised_paper_campaign_v1 import (
     run_campaign,
 )
 from automation.forex_engine.forex_p1_practice_paper_campaign_runtime_v1 import (
+    M5RuntimePaths,
     SIGNAL_SOURCES,
     SPRINT_4_SIGNAL_SOURCE,
     SUPERTREND_SIGNAL_SOURCE,
     completed_paper_records,
+    resolve_m5_runtime_paths,
     resolve_signal_source,
 )
 from automation.forex_engine.oanda_read_only_client import OandaReadOnlyClient
@@ -73,6 +75,11 @@ def parser() -> argparse.ArgumentParser:
             "by default."
         ),
     )
+    result.add_argument(
+        "--external-m5-runtime-root",
+        type=Path,
+        help="Use the single allowlisted external M5 PAPER runtime root.",
+    )
     result.add_argument("--kill-switch-file", type=Path, default=ROOT / ".aios/runtime/forex/kill_switch.active")
     result.add_argument("--risk-halt-file", type=Path, default=ROOT / ".aios/runtime/forex/risk_halt.active")
     result.add_argument("--cancel-file", type=Path, default=ROOT / ".aios/runtime/forex/cancel_campaign.active")
@@ -95,10 +102,21 @@ def campaign_paths_for_signal_source(
     )
 
 
-def runtime_paths_for_signal_source(signal_source: str) -> tuple[Path, Path | None]:
+def runtime_paths_for_signal_source(
+    signal_source: str,
+    *,
+    checkout_root: Path = ROOT,
+    external_m5_runtime_root: Path | None = None,
+) -> tuple[Path, Path | None, M5RuntimePaths | None]:
     if signal_source == SUPERTREND_SIGNAL_SOURCE:
-        return SUPER_TREND_PRACTICE_SESSION_PATH, SUPER_TREND_PRACTICE_SESSION_LOCK_PATH
-    return SUPERVISED_PRACTICE_SESSION_PATH, None
+        paths = resolve_m5_runtime_paths(
+            checkout_root=checkout_root,
+            external_runtime_root=external_m5_runtime_root,
+        )
+        return paths.active_session, paths.lock, paths
+    if external_m5_runtime_root is not None:
+        raise ValueError("external_m5_runtime_root_requires_supertrend")
+    return checkout_root / SUPERVISED_PRACTICE_SESSION_PATH.relative_to(ROOT), None, None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -108,9 +126,17 @@ def main(argv: list[str] | None = None) -> int:
             args.signal_source,
             supertrend_paper_demo_only=args.supertrend_paper_demo_only,
         )
+        runtime_path, runtime_lock_path, runtime_paths = runtime_paths_for_signal_source(
+            selected_signal_source,
+            external_m5_runtime_root=args.external_m5_runtime_root,
+        )
+        if args.external_m5_runtime_root is not None and args.output_root != REPORTS:
+            raise ValueError("external_m5_runtime_root_requires_default_output_root")
     except ValueError as exc:
         print(str(exc))
         return 2
+    if runtime_paths is not None and runtime_paths.mode == "APPROVED_EXTERNAL":
+        print(f"RUNTIME_ROOT_MODE: {runtime_paths.mode}")
     if not args.owner_local_runtime:
         print("RUNTIME_CREDENTIAL_OR_PRACTICE_DATA_REQUIRED")
         return 2
@@ -122,9 +148,9 @@ def main(argv: list[str] | None = None) -> int:
     client = OandaReadOnlyClient(
         api_token=token, account_id=account, environment="practice"
     )
-    paths = campaign_paths_for_signal_source(selected_signal_source, args.output_root)
-    runtime_path, runtime_lock_path = runtime_paths_for_signal_source(
-        selected_signal_source
+    paths = campaign_paths_for_signal_source(
+        selected_signal_source,
+        runtime_paths.root if runtime_paths and runtime_paths.mode == "APPROVED_EXTERNAL" else args.output_root,
     )
     candidates = completed_paper_records(
         client,
