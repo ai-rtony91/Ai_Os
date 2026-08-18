@@ -59,6 +59,7 @@ def build_cycle_record(
         "cycle_started_utc": cycle_started_utc, "cycle_completed_utc": cycle_completed_utc,
         "next_check_in_seconds": next_check_in_seconds, "next_check_at_utc": next_at,
         "instrument": "EUR_USD", "timeframe": "M5", "environment": "PRACTICE",
+        "git_commit": os.environ.get("AIOS_GIT_COMMIT", "runtime-local"),
         "http_methods": ["GET"], "history_get_count": data.get("history_get_count", 0),
         "pricing_get_count": data.get("pricing_get_count", 0),
         "history_request_start_utc": data.get("history_request_start_utc"),
@@ -124,3 +125,21 @@ def append_cycle_record(path: Path, record: Mapping[str, Any]) -> None:
         stream.write(line)
         stream.flush()
         os.fsync(stream.fileno())
+    # The provenance record is the runtime source event.  The learning ledger
+    # is derived from it and deduplicated by stable cycle identity.
+    try:
+        from automation.forex_engine.forex_p1_experience_learning_loop_v1 import append_cycle_experience
+        append_cycle_experience(
+            path.parent,
+            record,
+            git_commit=str(record.get("git_commit") or "runtime-local"),
+            dataset_identity={
+                "instrument": record.get("instrument"),
+                "timeframe": record.get("timeframe"),
+                "candle_close": record.get("latest_completed_candle_close_utc"),
+            },
+        )
+    except (OSError, ValueError):
+        # A learning-ledger failure is fail-closed for provenance callers; it
+        # must never become a trading capability or corrupt the JSONL record.
+        raise

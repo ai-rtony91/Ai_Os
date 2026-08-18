@@ -649,6 +649,13 @@ def completed_paper_records(
                                     else ("LOSS" if float(record.get("realized_pl", 0)) < 0 else "FLAT")
                                 ),
                                 "holding_duration_seconds": record.get("holding_duration_seconds"),
+                                "risk_amount": record.get("risk_amount"),
+                                "realized_r": (
+                                    round(float(record.get("realized_pl", 0.0)) / float(record["risk_amount"]), 8)
+                                    if record.get("risk_amount") not in (None, 0) else None
+                                ),
+                                "mfe_price": None, "mfe_r": None, "mae_price": None, "mae_r": None,
+                                "time_to_mfe": None, "time_to_mae": None,
                                 "candidate_status": "NONE", "paper_eligible": False,
                                 "ask_geometry_status": "NOT_EVALUATED",
                             }))
