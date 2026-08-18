@@ -90,10 +90,9 @@ RETURN_TO_BUCKET: BKT-FOREX-002
 
 At side-job completion, read this roadmap, verify current evidence, skip
 completed buckets, and return to the first valid unfinished dependency. For
-the current verified state, that return point is **Program B Bucket 2 — trade
-accounting integrity / open-hold-close path**. If Bucket 2 becomes complete
-during an interruption, the resolver must return to Bucket 3 rather than
-reopen Bucket 2.
+the current verified state, that return point is **Program B Bucket 3 — 30
+genuine qualifying PAPER trades**. Bucket 2 is complete; the resolver must
+not reopen it without new evidence.
 
 Human Owner reprioritization overrides this automatic return point. Missing
 return coordinates require roadmap inspection; they must never be guessed.
