@@ -40,6 +40,7 @@ def build_cycle_record(
     next_check_in_seconds: int | None = None, signal: Mapping[str, Any] | None = None,
     snapshot: Mapping[str, Any] | None = None, stale_reason: str | None = None,
     run_pid: int | None = None, lock_owner: str | None = None,
+    extra: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     signal = signal or {}
     snapshot = snapshot or {}
@@ -89,6 +90,8 @@ def build_cycle_record(
         "broker_write_performed": False, "practice_order_performed": False, "live_trade_performed": False,
         "money_movement_performed": False, "credentials_persisted": False,
     }
+    if extra:
+        record.update(dict(extra))
     return _clean(record)
 
 

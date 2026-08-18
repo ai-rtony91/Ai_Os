@@ -558,27 +558,30 @@ def completed_paper_records(
 
             consecutive_data_unavailable = 0
 
-            if telemetry_output_root is not None:
-                append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
-                    cycle_number=index + 1, maximum_cycles=cycles,
-                    cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
-                    action="EVALUATE", signal=signal, snapshot=snapshot,
-                    rejection_reasons=signal.get("rejection_reasons", [])))
-
             if active is None:
                 active = load_active_session(runtime_path)
             if active is None:
                 candidate = _candidate_from_signal(signal, snapshot)
                 if candidate is None:
                     next_wait_seconds = POLL_INTERVAL_SECONDS if index + 1 < cycles else None
+                    reasons = (
+                        _supertrend_wait_reasons(signal, candidate)
+                        if selected_signal_source == SUPERTREND_SIGNAL_SOURCE else ()
+                    )
+                    if telemetry_output_root is not None:
+                        append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
+                            cycle_number=index + 1, maximum_cycles=cycles,
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            action="NO_SIGNAL", signal=signal, snapshot=snapshot,
+                            rejection_reasons=reasons or signal.get("rejection_reasons", []),
+                            next_check_in_seconds=next_wait_seconds,
+                            extra={"paper_session_event": "NONE", "candidate_status": "NONE"}))
                     if selected_signal_source == SUPERTREND_SIGNAL_SOURCE:
                         yield CampaignWait(
                             index + 1,
                             cycles,
                             next_check_in_seconds=next_wait_seconds,
-                            rejection_reasons=_supertrend_wait_reasons(
-                                signal, candidate
-                            ),
+                            rejection_reasons=reasons,
                         )
                     else:
                         yield CampaignWait(
@@ -587,6 +590,14 @@ def completed_paper_records(
                             next_check_in_seconds=next_wait_seconds,
                         )
                 else:
+                    if telemetry_output_root is not None:
+                        append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
+                            cycle_number=index + 1, maximum_cycles=cycles,
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            action="PAPER_SESSION_OPEN", signal=signal, snapshot=snapshot,
+                            rejection_reasons=(), next_check_in_seconds=(
+                                POLL_INTERVAL_SECONDS if index + 1 < cycles else None
+                            ), extra={"paper_session_event": "OPEN", "candidate_status": "PAPER_ELIGIBLE"}))
                     open_paper_session(
                         snapshot,
                         candidate,
@@ -601,6 +612,22 @@ def completed_paper_records(
                     record = build_completed_trade_record(
                         active, snapshot, reason, reviewer_identity, _stamp(current)
                     )
+                    if telemetry_output_root is not None:
+                        append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
+                            cycle_number=index + 1, maximum_cycles=cycles,
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            action="PAPER_SESSION_CLOSE", signal=signal, snapshot=snapshot,
+                            rejection_reasons=(), extra={
+                                "paper_session_event": "CLOSE", "exit_reason": reason,
+                                "entry_price": active.get("entry_price"),
+                                "exit_price": record.get("exit_price"),
+                                "realized_paper_pl": record.get("realized_pl"),
+                                "win_or_loss": (
+                                    "WIN" if float(record.get("realized_pl", 0)) > 0
+                                    else ("LOSS" if float(record.get("realized_pl", 0)) < 0 else "FLAT")
+                                ),
+                                "holding_duration_seconds": record.get("holding_duration_seconds"),
+                            }))
                     _close_active_session(
                         runtime_path,
                         closed_at_utc=_stamp(current),
@@ -609,6 +636,14 @@ def completed_paper_records(
                     yield record
                 elif selected_signal_source == SUPERTREND_SIGNAL_SOURCE:
                     next_wait_seconds = POLL_INTERVAL_SECONDS if index + 1 < cycles else None
+                    if telemetry_output_root is not None:
+                        append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
+                            cycle_number=index + 1, maximum_cycles=cycles,
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            action="PAPER_SESSION_HELD", signal=signal, snapshot=snapshot,
+                            rejection_reasons=("duplicate_position_guard",),
+                            next_check_in_seconds=next_wait_seconds,
+                            extra={"paper_session_event": "HELD", "candidate_status": "NONE"}))
                     yield CampaignWait(
                         index + 1,
                         cycles,
