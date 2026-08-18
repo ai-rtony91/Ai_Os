@@ -29,6 +29,11 @@ from automation.forex_engine.forex_p1_paper_autostart_v1 import (
 from automation.forex_engine.forex_p1_oanda_practice_snapshot_capture_v1 import (
     extract_sanitized_price_snapshot,
 )
+from automation.forex_engine.forex_p1_cycle_provenance_v1 import (
+    append_cycle_record,
+    build_cycle_record,
+    telemetry_path,
+)
 from automation.forex_engine.forex_p1_supervised_paper_campaign_v1 import (
     CampaignHalt,
     CampaignWait,
@@ -275,7 +280,11 @@ def _supertrend_signal_state(
         "money_movement_allowed": False,
         "latest_rejection_reason": None,
         "rejection_reasons": [],
+        "decision_funnel": {},
     }
+    evaluated_candidate = evaluation.get("candidate")
+    evaluated_metadata = getattr(evaluated_candidate, "metadata", {}) or {}
+    result["decision_funnel"] = dict(evaluated_metadata)
     if evaluation.get("accepted") is not True or signal is None:
         rejection_reasons = _normalize_supertrend_rejection_reasons(
             evaluation.get("no_trade_reasons")
@@ -370,11 +379,13 @@ def _capture(
     signal_source: str = SPRINT_4_SIGNAL_SOURCE,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     transport = resolve_canonical_practice_transport(client)
+    history_started = _utc_now()
     candle_payload = transport.candles(INSTRUMENT, granularity=GRANULARITY, count=CANDLE_COUNT)
     candles = extract_canonical_completed_candles(candle_payload)
     history = validate_canonical_history_artifact(
         build_canonical_history_artifact(candles, requested_count=CANDLE_COUNT), now=now
     )
+    history_responded = _utc_now()
     signal = _build_signal_state(
         history, generated_at_utc=_stamp(now), signal_source=signal_source
     )
@@ -398,6 +409,25 @@ def _capture(
         )
     }
     session_snapshot["credentials_included"] = False
+    latest_close = datetime.fromisoformat(
+        history["last_observed_at_utc"].replace("Z", "+00:00")
+    )
+    snapshot_observed = datetime.fromisoformat(
+        session_snapshot["observed_at_utc"].replace("Z", "+00:00")
+    )
+    signal["provenance"] = {
+        **dict(signal.get("decision_funnel") or {}),
+        "history_get_count": 1, "pricing_get_count": 1,
+        "history_request_start_utc": _stamp(history_started),
+        "history_response_utc": _stamp(history_responded),
+        "pricing_request_start_utc": _stamp(history_responded),
+        "pricing_response_utc": _stamp(pricing_validation_time),
+        "latest_completed_candle_open_utc": candles[-1].get("observed_at_utc") if candles else None,
+        "latest_completed_candle_close_utc": history.get("last_observed_at_utc"),
+        "history_age_seconds": max(0.0, (now - latest_close).total_seconds()),
+        "snapshot_age_seconds": max(0.0, (pricing_validation_time - snapshot_observed).total_seconds()),
+        "history_freshness_result": "FRESH", "snapshot_freshness_result": "FRESH",
+    }
     return signal, session_snapshot
 
 
@@ -415,6 +445,7 @@ def completed_paper_records(
     risk_halt_active: Callable[[], bool] = lambda: False,
     signal_source: str = SPRINT_4_SIGNAL_SOURCE,
     supertrend_paper_demo_only: bool = False,
+    telemetry_output_root: Path | None = None,
 ) -> Iterator[dict[str, Any] | CampaignHalt | CampaignWait]:
     """Yield closed paper records, bounded waits, or an explicit fail-closed halt."""
     if isinstance(cycles, bool) or not isinstance(cycles, int) or cycles <= 0:
@@ -425,6 +456,8 @@ def completed_paper_records(
         signal_source,
         supertrend_paper_demo_only=supertrend_paper_demo_only,
     )
+    if telemetry_output_root is None:
+        telemetry_output_root = runtime_path.parent
     resolve_canonical_practice_transport(client)
     consecutive_data_unavailable = 0
     supertrend_lock_path = runtime_lock_path or _lock_path(runtime_path)
@@ -441,6 +474,7 @@ def completed_paper_records(
 
     try:
         for index in range(cycles):
+            cycle_started = now().astimezone(timezone.utc)
             if lock_owner is not None and not _touch_supertrend_lock(
                 supertrend_lock_path, lock_owner, now=_utc_now()
             ):
@@ -455,7 +489,7 @@ def completed_paper_records(
             if risk_halt_active():
                 yield CampaignHalt("RISK_HALT")
                 return
-            current = now().astimezone(timezone.utc)
+            current = cycle_started
             active = None
             if selected_signal_source == SUPERTREND_SIGNAL_SOURCE:
                 active = load_active_session(runtime_path)
@@ -485,30 +519,51 @@ def completed_paper_records(
                     next_check_in_seconds=next_wait_seconds,
                     rejection_reasons=("data_unavailable",),
                 )
+                if telemetry_output_root is not None:
+                    append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
+                        cycle_number=index + 1, maximum_cycles=cycles,
+                        cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                        action=WAIT_FOR_DATA, rejection_reasons=("data_unavailable",),
+                        next_check_in_seconds=next_wait_seconds))
                 if next_wait_seconds is not None:
                     sleep(next_wait_seconds)
                 continue
             except ValueError as exc:
                 if str(exc) in {"stale_history", "stale_snapshot"}:
-                    yield CampaignHalt("STALE_MARKET_DATA")
-                    return
-                consecutive_data_unavailable += 1
-                next_wait_seconds = _data_unavailable_backoff_seconds(
-                    consecutive_data_unavailable
-                ) if index + 1 < cycles else None
-                yield CampaignWait(
-                    index + 1,
-                    cycles,
-                    action=WAIT_FOR_DATA,
-                    observed_at_utc=_stamp(current),
-                    next_check_in_seconds=next_wait_seconds,
-                    rejection_reasons=("data_unavailable",),
-                )
-                if next_wait_seconds is not None:
-                    sleep(next_wait_seconds)
-                continue
+                    stale_reason = str(exc)
+                    consecutive_data_unavailable += 1
+                    next_wait_seconds = _data_unavailable_backoff_seconds(
+                        consecutive_data_unavailable
+                    ) if index + 1 < cycles else None
+                    yield CampaignWait(
+                        index + 1, cycles, action=WAIT_FOR_DATA,
+                        observed_at_utc=_stamp(current),
+                        next_check_in_seconds=next_wait_seconds,
+                        rejection_reasons=(stale_reason,),
+                    )
+                    if telemetry_output_root is not None:
+                        append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
+                            cycle_number=index + 1, maximum_cycles=cycles,
+                            cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                            action=WAIT_FOR_DATA, rejection_reasons=(stale_reason,),
+                            next_check_in_seconds=next_wait_seconds, stale_reason=stale_reason))
+                    if next_wait_seconds is not None:
+                        sleep(next_wait_seconds)
+                    continue
+                # Schema, price, instrument, and strategy invariant failures are
+                # terminal.  Only the explicitly classified read failures above
+                # may retry.
+                yield CampaignHalt("INVALID_MARKET_DATA")
+                return
 
             consecutive_data_unavailable = 0
+
+            if telemetry_output_root is not None:
+                append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
+                    cycle_number=index + 1, maximum_cycles=cycles,
+                    cycle_started_utc=_stamp(cycle_started), cycle_completed_utc=_stamp(current),
+                    action="EVALUATE", signal=signal, snapshot=snapshot,
+                    rejection_reasons=signal.get("rejection_reasons", [])))
 
             if active is None:
                 active = load_active_session(runtime_path)
