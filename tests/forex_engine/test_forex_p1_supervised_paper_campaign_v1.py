@@ -81,7 +81,7 @@ def test_stops_at_30_and_never_consumes_31st(paths):
     assert state["accepted_qualifying_trades"] == 30
     assert consumed == list(range(1, 31))
     assert "TRADE: 30/30" in output
-    assert state["p1_status"] == "READY_FOR_P2_REVIEW"
+    assert state["p1_status"] == "REQUIRE_MORE_EVIDENCE"
 
 
 def test_30_supertrend_records_are_counted_in_a_separate_strategy_ledger(paths, tmp_path):
