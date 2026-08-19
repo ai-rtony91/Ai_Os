@@ -11,6 +11,11 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from automation.forex_engine.forex_p1_supervised_paper_capture_replay_v1 import run_capture_replay
+from automation.forex_engine.strategies import (
+    classify_r_multiple,
+    planned_reward_risk,
+    realized_r_multiple,
+)
 
 VERSION = "forex_p1_supervised_paper_session_v1"
 SNAPSHOT_SCHEMA = "AIOS_P1_SUPERVISED_PAPER_MARKET_SNAPSHOT.v1"
@@ -237,7 +242,12 @@ def build_completed_trade_record(session: Mapping[str, Any], closing_snapshot: M
         mae_timestamp = snap["observed_at_utc"]
     base.update({
         "holding_duration_seconds": round((exit_time - entry_time).total_seconds(), 6),
+        "planned_reward_risk": planned_reward_risk(
+            session["entry_price"], session["stop_price"], session["target_price"]
+        ),
         "outcome_r": round(float(result["net_pl"]) / risk, 8) if risk else None,
+        "realized_r": realized_r_multiple(result["net_pl"], risk),
+        "roi_class": classify_r_multiple(result["net_pl"], risk),
         "mfe_price": mfe_price,
         "mae_price": mae_price,
         "mfe_r": round((mfe_price - entry) * units / risk, 8) if risk else None,

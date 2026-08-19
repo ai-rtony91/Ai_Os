@@ -2,7 +2,10 @@ from automation.forex_engine.daily_edge_report import deterministic_supertrend_s
 from automation.forex_engine.models import Direction
 from automation.forex_engine.strategies import (
     SupertrendPullbackConfig,
+    classify_r_multiple,
     evaluate_supertrend_pullback,
+    planned_reward_risk,
+    realized_r_multiple,
 )
 
 
@@ -64,3 +67,37 @@ def test_supertrend_pullback_blocks_bad_reward_risk():
     result = evaluate_supertrend_pullback(candles, SupertrendPullbackConfig(min_reward_risk=10.0))
     assert result["accepted"] is False
     assert any("reward_risk" in reason for reason in result["no_trade_reasons"])
+
+
+def test_supertrend_pullback_minimum_boundary_accepts_when_other_gates_pass(monkeypatch):
+    candles = deterministic_supertrend_sample(count=8)
+    config = SupertrendPullbackConfig(min_reward_risk=1.5, target_reward_risk=2.0)
+    monkeypatch.setattr(
+        "automation.forex_engine.strategies.supertrend",
+        lambda _candles, *_args, **_kwargs: [
+            *([{"direction": Direction.DOWN, "lower_band": 1.0990, "upper_band": 1.1010}] * (len(_candles) - 1)),
+            {"direction": Direction.UP, "lower_band": 1.0990, "upper_band": 1.1010},
+        ],
+    )
+    monkeypatch.setattr(
+        "automation.forex_engine.strategies.atr",
+        lambda _candles, *_args, **_kwargs: [0.0006] * len(_candles),
+    )
+    for candle in candles:
+        candle.open = 1.1000
+        candle.close = 1.1006
+        candle.high = 1.1010
+        candle.low = 1.0990
+    result = evaluate_supertrend_pullback(candles, config)
+    assert result["accepted"] is True
+    assert result["candidate"].metadata["planned_reward_risk"] == 2.0
+    assert result["candidate"].metadata["target_reward_risk"] == 2.0
+
+
+def test_rr_helpers_classify_and_compute_expected_values():
+    assert planned_reward_risk(1.1000, 1.0990, 1.1020) == pytest.approx(2.0)
+    assert realized_r_multiple(2.0, 1.0) == 2.0
+    assert classify_r_multiple(2.0, 1.0) == "POSITIVE_R"
+    assert classify_r_multiple(-1.0, 1.0) == "NEGATIVE_R"
+    assert classify_r_multiple(0.0, 1.0) == "FLAT_R"
+    assert classify_r_multiple(1.0, 0.0) == "INVALID_R"
