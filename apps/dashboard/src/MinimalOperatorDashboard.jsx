@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './MinimalOperatorDashboard.css';
 import MeasurementConsole from './components/aios_measurement/MeasurementConsole';
+import ForexCampaignDashboard from './ForexCampaignDashboard.jsx';
 import useRuntimeVisibility from './hooks/useRuntimeVisibility';
 
 const ROOMS = [
@@ -65,19 +66,10 @@ function Forex() {
         <div><p className="eyebrow">Paper-only view</p><h1 id="forex-title">Forex</h1></div>
         <StatusPill tone="danger">Execution off</StatusPill>
       </div>
-      <div className="metricGrid" aria-label="Forex status">
-        <article className="metric"><span>Mode</span><strong>Display only</strong><small>No runtime evidence</small></article>
-        <article className="metric"><span>Broker</span><strong>Locked</strong><small>Owner approval required</small></article>
-        <article className="metric"><span>Readiness</span><strong>Unknown</strong><small>Evidence not connected</small></article>
-      </div>
       <div className="safetyStrip" aria-label="Forex safety locks">
         {FOREX_SAFETY.map((state) => <StatusPill tone="danger" key={state}>{state}</StatusPill>)}
       </div>
-      <p className="compactNote">Trading execution remains locked; trading execution stays locked. ORDER CONTROL remains absent, and order controls are not available.</p>
-      <div className="sectionTitle"><h2>Watchlist</h2><span>Read only</span></div>
-      <div className="pairGrid">
-        {PAIRS.map(([pair, flags]) => <article className="pair" key={pair}><span aria-hidden="true">{flags}</span><strong>{pair}</strong><StatusPill>Watch</StatusPill></article>)}
-      </div>
+      <ForexCampaignDashboard />
     </section>
   );
 }
