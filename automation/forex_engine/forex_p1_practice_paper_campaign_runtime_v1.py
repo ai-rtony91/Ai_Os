@@ -713,8 +713,9 @@ def completed_paper_records(
                 bid = float(snapshot["bid"])
                 if bid >= float(active["target_price"]) or bid <= float(active["stop_price"]):
                     reason = "paper_target" if bid >= float(active["target_price"]) else "paper_stop"
+                    review_utc = _stamp(_utc_now())
                     record = build_completed_trade_record(
-                        active, snapshot, reason, reviewer_identity, _stamp(current)
+                        active, snapshot, reason, reviewer_identity, review_utc
                     )
                     if telemetry_output_root is not None:
                         append_cycle_record(telemetry_path(telemetry_output_root), build_cycle_record(
