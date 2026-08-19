@@ -182,7 +182,7 @@ def test_extra_r_classification_fields_do_not_change_qualifying_credit(paths):
         paths,
     )
     assert state["accepted_qualifying_trades"] == 1
-    assert state["trade_results"][0]["realized_pl"] == 10.0
+    assert state["trade_results"][0]["realized_paper_pl"] == 10.0
 
 
 def test_strategy_qualified_campaign_rejects_mixed_strategy_record(paths):
