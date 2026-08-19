@@ -732,10 +732,16 @@ def completed_paper_records(
                                 ),
                                 "holding_duration_seconds": record.get("holding_duration_seconds"),
                                 "risk_amount": record.get("risk_amount"),
+                                "planned_reward_risk": record.get("planned_reward_risk"),
                                 "realized_r": (
-                                    round(float(record.get("realized_pl", 0.0)) / float(record["risk_amount"]), 8)
-                                    if record.get("risk_amount") not in (None, 0) else None
+                                    record.get("realized_r")
+                                    if record.get("realized_r") is not None
+                                    else (
+                                        round(float(record.get("realized_pl", 0.0)) / float(record["risk_amount"]), 8)
+                                        if record.get("risk_amount") not in (None, 0) else None
+                                    )
                                 ),
+                                "roi_class": record.get("roi_class"),
                                 "mfe_price": record.get("mfe_price"), "mfe_r": record.get("mfe_r"),
                                 "mae_price": record.get("mae_price"), "mae_r": record.get("mae_r"),
                                 "time_to_mfe": record.get("time_to_mfe_seconds"),

@@ -97,6 +97,9 @@ def test_close_preserves_paper_excursion_and_holding_metrics(tmp_path):
     assert record["mae_price"] == 1.1
     assert record["mae_r"] > 0
     assert record["outcome_r"] > 0
+    assert record["planned_reward_risk"] == pytest.approx(2.0)
+    assert record["realized_r"] == pytest.approx(record["outcome_r"])
+    assert record["roi_class"] == "POSITIVE_R"
 
 
 def test_abort_has_zero_credit_and_flags_false(tmp_path):

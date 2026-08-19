@@ -169,6 +169,22 @@ def test_30_supertrend_records_are_counted_in_a_separate_strategy_ledger(paths, 
     )
 
 
+def test_extra_r_classification_fields_do_not_change_qualifying_credit(paths):
+    state, _ = run(
+        [
+            {
+                **trade(1),
+                "planned_reward_risk": 2.0,
+                "realized_r": 2.0,
+                "roi_class": "POSITIVE_R",
+            }
+        ],
+        paths,
+    )
+    assert state["accepted_qualifying_trades"] == 1
+    assert state["trade_results"][0]["realized_pl"] == 10.0
+
+
 def test_strategy_qualified_campaign_rejects_mixed_strategy_record(paths):
     state, _ = run(
         [trade(1)],

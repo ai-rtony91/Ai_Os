@@ -1,6 +1,7 @@
 """PAPER_ONLY Supertrend strategy candidates for local edge research."""
 
 from dataclasses import dataclass
+from math import isfinite
 
 from automation.forex_engine.indicators import DOWN, UP, atr, supertrend
 from automation.forex_engine.market_data import validate_candle_sequence
@@ -20,6 +21,49 @@ class SupertrendPullbackConfig:
     min_reward_risk: float = 1.5
     target_reward_risk: float = 2.0
     chop_lookback: int = 4
+
+
+def classify_r_multiple(realized_pl: float | int | None, risk_amount: float | int | None) -> str:
+    try:
+        risk = float(risk_amount)
+        pnl = float(realized_pl)
+    except (TypeError, ValueError):
+        return "INVALID_R"
+    if not (risk > 0 and isfinite(risk) and isfinite(pnl)):
+        return "INVALID_R"
+    realized_r = pnl / risk
+    if realized_r > 0:
+        return "POSITIVE_R"
+    if realized_r < 0:
+        return "NEGATIVE_R"
+    return "FLAT_R"
+
+
+def realized_r_multiple(realized_pl: float | int | None, risk_amount: float | int | None) -> float | None:
+    try:
+        risk = float(risk_amount)
+        pnl = float(realized_pl)
+    except (TypeError, ValueError):
+        return None
+    if not (risk > 0 and isfinite(risk) and isfinite(pnl)):
+        return None
+    return pnl / risk
+
+
+def planned_reward_risk(entry_price: float | int | None, stop_loss: float | int | None, take_profit: float | int | None) -> float | None:
+    try:
+        entry = float(entry_price)
+        stop = float(stop_loss)
+        target = float(take_profit)
+    except (TypeError, ValueError):
+        return None
+    if not all(map(isfinite, (entry, stop, target))):
+        return None
+    risk = abs(entry - stop)
+    reward = abs(target - entry)
+    if not (risk > 0):
+        return None
+    return reward / risk
 
 
 def evaluate_supertrend_pullback(candles, strategy_config=SupertrendPullbackConfig()):
@@ -100,6 +144,9 @@ def evaluate_supertrend_pullback(candles, strategy_config=SupertrendPullbackConf
             "atr": round(last_atr, 10),
             "band": round(band, 10),
             "reward_risk": round(reward_risk, 4),
+            "planned_reward_risk": round(reward_risk, 4),
+            "min_reward_risk": strategy_config.min_reward_risk,
+            "target_reward_risk": strategy_config.target_reward_risk,
             "warning": "edge candidate only; no live approval",
         },
     )
