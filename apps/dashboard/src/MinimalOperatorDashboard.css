@@ -43,3 +43,251 @@ button:active,.primaryAction:active { transform:scale(.98); }
 .measurementPanel text { fill: #ddd4ee; stroke: none; font-size: 5px; }
 .measurementPanel dl div { display: flex; gap: 1rem; }
 @media (max-width: 700px) { .measurementControls { grid-template-columns: repeat(2, 1fr); } }
+
+.forexCampaignDashboard {
+  display: grid;
+  gap: 18px;
+}
+
+.topHeader {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.topHeader h1 {
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  letter-spacing: -0.06em;
+  line-height: 0.92;
+  margin: 0;
+}
+
+.subtitle, .mutedMono {
+  color: var(--muted);
+}
+
+.headerStatus {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+
+.progressCopy {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  text-align: right;
+}
+
+.progressCopy strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.progressPanel {
+  background: linear-gradient(135deg, rgba(29, 18, 51, 0.9), rgba(20, 13, 36, 0.66));
+  border: 1px solid var(--aios-border);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.progressBar {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  height: 14px;
+  overflow: hidden;
+}
+
+.progressBar span {
+  background: linear-gradient(90deg, var(--aios-cyan), var(--aios-violet-bright));
+  display: block;
+  height: 100%;
+}
+
+.kpiGrid, .summaryGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metricCard, .panel {
+  background: linear-gradient(135deg, rgba(29, 18, 51, 0.88), rgba(20, 13, 36, 0.72));
+  border: 1px solid var(--aios-border);
+  border-radius: 18px;
+}
+
+.metricCard {
+  min-height: 130px;
+  padding: 16px;
+}
+
+.metricCard span,
+.statRow span,
+.rejectionItem span,
+.sourceList span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.metricCard strong {
+  display: block;
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  margin-top: 10px;
+}
+
+.metricCard small {
+  color: var(--muted);
+  display: block;
+  margin-top: 8px;
+}
+
+.twoCol, .threeCol, .chartsGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.threeCol, .chartsGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.panel {
+  padding: 16px;
+}
+
+.panelHead {
+  align-items: start;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panelHead h2 {
+  margin: 0;
+}
+
+.activeTradeGrid,
+.stackedStats {
+  display: grid;
+  gap: 10px;
+}
+
+.statRow {
+  align-items: start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: grid;
+  gap: 4px;
+  grid-template-columns: minmax(160px, 0.7fr) 1fr;
+  padding-bottom: 10px;
+}
+
+.statRow strong {
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.rejectionList,
+.safetyGrid,
+.sourceList {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.rejectionItem {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.tradeTable {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tradeTable th,
+.tradeTable td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.84rem;
+  padding: 10px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tradeTable th {
+  color: var(--muted);
+  position: sticky;
+  top: 0;
+  background: rgba(17, 11, 29, 0.95);
+}
+
+.tableWrap {
+  overflow: auto;
+  border-radius: 14px;
+  max-height: 620px;
+}
+
+.chartPanel {
+  min-height: 230px;
+}
+
+.sparkline {
+  height: 180px;
+  width: 100%;
+}
+
+.chartEmpty {
+  align-items: center;
+  color: var(--muted);
+  display: grid;
+  height: 180px;
+  justify-items: center;
+}
+
+.sourceList div {
+  display: grid;
+  gap: 4px;
+}
+
+.forexCampaignError {
+  padding: 18px;
+}
+
+@media (max-width: 1100px) {
+  .kpiGrid, .summaryGrid, .chartsGrid, .threeCol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .topHeader,
+  .panelHead {
+    align-items: start;
+    flex-direction: column;
+  }
+  .headerStatus,
+  .progressCopy {
+    justify-items: start;
+    text-align: left;
+  }
+  .twoCol, .kpiGrid, .summaryGrid, .chartsGrid, .threeCol {
+    grid-template-columns: 1fr;
+  }
+  .statRow {
+    grid-template-columns: 1fr;
+  }
+  .statRow strong {
+    text-align: left;
+  }
+  .tableWrap {
+    max-height: none;
+  }
+}

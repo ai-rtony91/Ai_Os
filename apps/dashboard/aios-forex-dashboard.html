@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>AIOS Forex - 30 Trade Paper Campaign</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070912;
+      --surface: rgba(17, 21, 35, 0.92);
+      --surface-2: rgba(24, 29, 47, 0.92);
+      --line: rgba(118, 136, 185, 0.22);
+      --text: #edf3ff;
+      --muted: #9aa9c5;
+      --cyan: #42d8ff;
+      --violet: #a78bfa;
+      --pink: #f472b6;
+      --gold: #fbbf24;
+      --good: #38d9a9;
+      --danger: #ff7a90;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(66, 216, 255, 0.14), transparent 28%),
+        radial-gradient(circle at 86% 12%, rgba(167, 139, 250, 0.16), transparent 24%),
+        linear-gradient(180deg, #05070d 0%, #070912 100%);
+      min-width: 320px;
+    }
+    .shell {
+      width: min(1600px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 40px;
+      display: grid;
+      gap: 14px;
+    }
+    .topHeader, .panel, .metricCard {
+      background: linear-gradient(135deg, rgba(28, 34, 53, 0.92), rgba(14, 18, 30, 0.92));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.26);
+    }
+    .topHeader {
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.73rem;
+      font-weight: 800;
+    }
+    h1, h2, p { margin: 0; }
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      line-height: 0.93;
+      letter-spacing: -0.06em;
+    }
+    .subtitle, .muted {
+      color: var(--muted);
+    }
+    .headerStatus {
+      display: grid;
+      gap: 10px;
+      justify-items: end;
+      text-align: right;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .pill.good { color: var(--good); border-color: rgba(56, 217, 169, 0.38); }
+    .pill.danger { color: var(--danger); border-color: rgba(255, 122, 144, 0.38); }
+    .progressCopy {
+      display: grid;
+      gap: 2px;
+    }
+    .progressCopy strong { font-size: 2rem; line-height: 1; }
+    .progressBar {
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.07);
+    }
+    .progressBar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+    }
+    .grid8, .grid6, .grid3 {
+      display: grid;
+      gap: 12px;
+    }
+    .grid8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .metricCard {
+      padding: 16px;
+      min-height: 128px;
+    }
+    .metricCard span, .statRow span, .sourceList span, .rejectionItem span {
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+    .metricCard strong {
+      display: block;
+      margin-top: 10px;
+      font-size: clamp(1.3rem, 2.8vw, 2rem);
+    }
+    .metricCard small { display: block; color: var(--muted); margin-top: 8px; }
+    .panel {
+      padding: 16px;
+    }
+    .panelHead {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .panelHead h2 { font-size: 1.1rem; }
+    .twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .statGrid {
+      display: grid;
+      gap: 10px;
+    }
+    .statRow {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.68fr) 1fr;
+      gap: 10px;
+      align-items: start;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .statRow strong { text-align: right; font-size: 0.97rem; }
+    .tableWrap {
+      overflow: auto;
+      border-radius: 14px;
+      max-height: 620px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1540px;
+    }
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap;
+      font-size: 0.84rem;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: rgba(10, 13, 22, 0.96);
+      color: var(--muted);
+      z-index: 1;
+    }
+    .charts {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    .chart {
+      min-height: 220px;
+    }
+    .chart svg {
+      width: 100%;
+      height: 180px;
+      display: block;
+    }
+    .chart .empty {
+      height: 180px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+    }
+    .sourceList, .safetyGrid, .rejectionList {
+      display: grid;
+      gap: 8px;
+    }
+    .rejectionItem {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+    }
+    .tagGrid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sourceList div {
+      display: grid;
+      gap: 4px;
+    }
+    .statusStrip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .danger { color: var(--danger); }
+    code {
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+    @media (max-width: 1200px) {
+      .grid8, .grid6, .grid3, .charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .twoCol { grid-template-columns: 1fr; }
+      table { min-width: 1320px; }
+    }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 16px, 1600px); }
+      .topHeader { flex-direction: column; align-items: start; }
+      .headerStatus { justify-items: start; text-align: left; }
+      .grid8, .grid6, .grid3, .charts { grid-template-columns: 1fr; }
+      .statRow { grid-template-columns: 1fr; }
+      .statRow strong { text-align: left; }
+      .tableWrap { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topHeader">
+      <div>
+        <p class="eyebrow">AIOS FOREX</p>
+        <h1>30 TRADE PAPER CAMPAIGN</h1>
+        <p class="subtitle">Local, read-only, persisted evidence only.</p>
+      </div>
+      <div class="headerStatus">
+        <span id="campaignStatus" class="pill">UNKNOWN</span>
+        <div class="progressCopy">
+          <strong id="progressText">0 / 30</strong>
+          <span id="progressPct" class="muted">0.0%</span>
+          <span id="remainingText" class="muted">30 REMAINING</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="progressBar"><span id="progressBarFill" style="width: 0%"></span></div>
+    </section>
+
+    <section class="grid8" id="kpiGrid"></section>
+
+    <section class="twoCol">
+      <article class="panel">
+        <div class="panelHead">
+          <div>
+            <p class="eyebrow">ACTIVE TRADE</p>
+            <h2 id="activeStatus">UNKNOWN</h2>
+          </div>
+          <span class="pill danger">BROKER LOCKED</span>
+        </div>
+        <div class="statGrid" id="activeGrid"></div>
+      </article>
+      <article class="panel">
+        <div class="panelHead">
+          <div>
+            <p class="eyebrow">STRATEGY / SIGNAL</p>
+            <h2 id="strategyName">supertrend_pullback_v1</h2>
+          </div>
+          <span class="pill">NON-QUALIFYING ANALYSIS</span>
+        </div>
+        <div class="statGrid" id="signalGrid"></div>
+        <div class="rejectionList" id="rejectionList"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panelHead">
+        <div>
+          <p class="eyebrow">30-TRADE PROGRESSION</p>
+          <h2>Qualifying trade ledger</h2>
+        </div>
+        <span class="pill good">READ ONLY</span>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Trade #</th><th>Trade ID</th><th>Date/Time</th><th>Direction</th><th>Entry</th><th>Stop</th><th>Target</th><th>Planned R:R</th><th>Exit</th><th>Exit Reason</th><th>P/L</th><th>Realized R</th><th>R Classification</th><th>MFE R</th><th>MAE R</th><th>Hold Time</th><th>Cumulative P/L</th><th>Cumulative R</th>
+            </tr>
+          </thead>
+          <tbody id="tradeRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid6" id="summaryGrid"></section>
+
+    <section class="charts">
+      <article class="panel chart"><div class="panelHead"><h2>Cumulative PAPER P/L</h2></div><div id="chartPl"></div></article>
+      <article class="panel chart"><div class="panelHead"><h2>Cumulative realized R</h2></div><div id="chartR"></div></article>
+      <article class="panel chart"><div class="panelHead"><h2>Realized R per trade</h2></div><div id="chartTradeR"></div></article>
+      <article class="panel chart"><div class="panelHead"><h2>Win / loss distribution</h2></div><div id="chartWld"></div></article>
+      <article class="panel chart"><div class="panelHead"><h2>Drawdown progression</h2></div><div id="chartDd"></div></article>
+    </section>
+
+    <section class="threeCol">
+      <article class="panel">
+        <div class="panelHead"><h2>Data Quality</h2></div>
+        <div class="statGrid" id="dataGrid"></div>
+      </article>
+      <article class="panel">
+        <div class="panelHead"><h2>Live Readiness</h2></div>
+        <div class="statGrid" id="readinessGrid"></div>
+      </article>
+      <article class="panel">
+        <div class="panelHead"><h2>Safety</h2></div>
+        <div class="statusStrip" id="safetyStrip"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panelHead"><h2>Sources</h2></div>
+      <div class="sourceList" id="sourceList"></div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = '/api/forex/paper-campaign';
+    const REFRESH_MS = 3000;
+
+    const FALLBACK = '—';
+    const nf = new Intl.NumberFormat('en-US', { maximumFractionDigits: 5 });
+
+    function safeText(value, fallback = FALLBACK) {
+      return value === null || value === undefined || value === '' ? fallback : String(value);
+    }
+
+    function formatNumber(value, digits = 3) {
+      return typeof value === 'number' ? value.toFixed(digits) : FALLBACK;
+    }
+
+    function formatTradeValue(value) {
+      if (value === null || value === undefined || value === '') return '';
+      if (typeof value === 'number') return nf.format(value);
+      return String(value);
+    }
+
+    function metricCard(label, value, note) {
+      return `<article class="metricCard"><span>${label}</span><strong>${value}</strong><small>${note}</small></article>`;
+    }
+
+    function statRow(label, value, danger = false) {
+      return `<div class="statRow"><span>${label}</span><strong class="${danger ? 'danger' : ''}">${value}</strong></div>`;
+    }
+
+    function sparkline(values, stroke) {
+      const filtered = values.filter((value) => typeof value === 'number' && Number.isFinite(value));
+      if (filtered.length < 2) return '<div class="empty">No chartable evidence yet.</div>';
+      const min = Math.min(...filtered);
+      const max = Math.max(...filtered);
+      const range = max - min || 1;
+      const points = filtered.map((value, index) => {
+        const x = (index / (filtered.length - 1)) * 100;
+        const y = 100 - (((value - min) / range) * 100);
+        return `${x.toFixed(2)},${y.toFixed(2)}`;
+      }).join(' ');
+      return `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${points}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>`;
+    }
+
+    function renderBadge(label, tone = '') {
+      return `<span class="pill ${tone}">${label}</span>`;
+    }
+
+    function render(snapshot) {
+      const campaign = snapshot.campaignState || {};
+      const summary = snapshot.summary || {};
+      const active = snapshot.activeTrade || {};
+      const signal = snapshot.signal || {};
+      const integrity = snapshot.integrity || {};
+      const readiness = snapshot.readiness || {};
+      const safety = snapshot.safety || {};
+      const progression = snapshot.progression || [];
+
+      document.getElementById('campaignStatus').textContent = safeText(campaign.campaign_status);
+      document.getElementById('progressText').textContent = `${summary.accepted ?? 0} / ${summary.target ?? 30}`;
+      document.getElementById('progressPct').textContent = typeof summary.progressPercent === 'number' ? `${summary.progressPercent.toFixed(1)}%` : FALLBACK;
+      document.getElementById('remainingText').textContent = `${summary.remaining ?? 0} REMAINING`;
+      document.getElementById('progressBarFill').style.width = `${Math.max(0, Math.min(100, summary.progressPercent || 0))}%`;
+
+      document.getElementById('kpiGrid').innerHTML = [
+        metricCard('QUALIFYING TRADES', `${summary.accepted ?? 0} / ${summary.target ?? 30}`, 'Canonical PAPER evidence only'),
+        metricCard('NET PAPER P/L', formatNumber(summary.netPl), 'Persisted campaign state'),
+        metricCard('EXPECTANCY', formatNumber(summary.expectancy), 'Per qualifying trade'),
+        metricCard('PROFIT FACTOR', safeText(summary.profitFactor), 'Trade set aggregate'),
+        metricCard('WIN RATE', typeof summary.winRate === 'number' ? `${summary.winRate.toFixed(1)}%` : FALLBACK, 'Derived from state'),
+        metricCard('MAX DRAWDOWN', formatNumber(summary.maxDrawdown), 'PAPER only'),
+        metricCard('AVERAGE R', formatNumber(summary.averageR), 'Realized R average'),
+        metricCard('TOTAL R', formatNumber(summary.totalR), 'Realized R total'),
+      ].join('');
+
+      document.getElementById('activeStatus').textContent = safeText(active.positionStatus, 'UNKNOWN');
+      document.getElementById('activeGrid').innerHTML = [
+        statRow('Instrument', safeText(active.instrument, 'EUR/USD')),
+        statRow('Direction', safeText(active.direction)),
+        statRow('Entry', formatTradeValue(active.entry)),
+        statRow('Current Price', formatTradeValue(active.currentPrice)),
+        statRow('Stop', formatTradeValue(active.stop)),
+        statRow('Target', formatTradeValue(active.target)),
+        statRow('Units', safeText(active.units)),
+        statRow('Planned R:R', formatTradeValue(active.plannedRr)),
+        statRow('Current / Realized R', `${formatTradeValue(active.currentR)} / ${formatTradeValue(active.realizedR)}`),
+        statRow('Unrealized PAPER P/L', formatTradeValue(active.unrealizedPl)),
+        statRow('MFE R', formatTradeValue(active.mfeR)),
+        statRow('MAE R', formatTradeValue(active.maeR)),
+        statRow('Hold Time', safeText(active.holdTime)),
+        statRow('Entry Time UTC', safeText(active.entryTimeUtc)),
+        statRow('Entry Time New York', safeText(active.entryTimeNy)),
+      ].join('');
+
+      document.getElementById('strategyName').textContent = safeText(summary.strategy, 'supertrend_pullback_v1');
+      document.getElementById('signalGrid').innerHTML = [
+        statRow('Current Signal', safeText(signal.currentSignal)),
+        statRow('Supertrend Direction', safeText(signal.supertrendDirection)),
+        statRow('ATR Actual / Minimum', `${formatTradeValue(signal.atrActual)} / ${formatTradeValue(signal.atrMinimum)}`),
+        statRow('Body Ratio / Minimum', `${formatTradeValue(signal.bodyRatio)} / ${formatTradeValue(signal.bodyMinimum)}`),
+        statRow('Spread', formatTradeValue(signal.spread)),
+        statRow('Latest Rejection Reason', safeText(signal.latestRejectionReason)),
+        statRow('No-signal Reason', safeText(signal.noSignalReason)),
+      ].join('');
+
+      document.getElementById('rejectionList').innerHTML = Object.entries(signal.rejectionCounts || {})
+        .slice(0, 8)
+        .map(([key, value]) => `<div class="rejectionItem"><span>${key}</span><strong>${String(value)}</strong></div>`)
+        .join('');
+
+      document.getElementById('tradeRows').innerHTML = progression.map((row) => `
+        <tr>
+          <td>${row.tradeNumber}</td><td>${row.tradeId || ''}</td><td>${row.dateTime || ''}</td><td>${row.direction || ''}</td>
+          <td>${formatTradeValue(row.entry)}</td><td>${formatTradeValue(row.stop)}</td><td>${formatTradeValue(row.target)}</td><td>${formatTradeValue(row.plannedRr)}</td>
+          <td>${formatTradeValue(row.exit)}</td><td>${row.exitReason || ''}</td><td>${formatTradeValue(row.pl)}</td><td>${formatTradeValue(row.realizedR)}</td>
+          <td>${row.rClassification || ''}</td><td>${formatTradeValue(row.mfeR)}</td><td>${formatTradeValue(row.maeR)}</td><td>${row.holdTime || ''}</td>
+          <td>${formatTradeValue(row.cumulativePl)}</td><td>${formatTradeValue(row.cumulativeR)}</td>
+        </tr>`).join('');
+
+      document.getElementById('summaryGrid').innerHTML = [
+        metricCard('Positive-R trades', safeText(summary.positiveRTrades, 0), 'R > 0'),
+        metricCard('Negative-R trades', safeText(summary.negativeRTrades, 0), 'R < 0'),
+        metricCard('Flat-R trades', safeText(summary.flatRTrades, 0), 'R = 0'),
+        metricCard('Best R', formatNumber(summary.bestR), 'Maximum realized R'),
+        metricCard('Worst R', formatNumber(summary.worstR), 'Minimum realized R'),
+        metricCard('Strategy', safeText(summary.strategy), 'Canonical campaign strategy'),
+      ].join('');
+
+      document.getElementById('chartPl').innerHTML = sparkline(progression.map((row) => row.cumulativePl).filter((value) => typeof value === 'number'), 'var(--cyan)');
+      document.getElementById('chartR').innerHTML = sparkline(progression.map((row) => row.cumulativeR).filter((value) => typeof value === 'number'), 'var(--violet)');
+      document.getElementById('chartTradeR').innerHTML = sparkline(progression.map((row) => row.realizedR).filter((value) => typeof value === 'number'), 'var(--pink)');
+      document.getElementById('chartWld').innerHTML = sparkline([summary.positiveRTrades || 0, summary.negativeRTrades || 0, summary.flatRTrades || 0], 'var(--gold)');
+      document.getElementById('chartDd').innerHTML = sparkline([summary.maxDrawdown || 0, 0], 'var(--danger)');
+
+      document.getElementById('dataGrid').innerHTML = [
+        statRow('Data freshness', safeText(integrity.dataFreshness)),
+        statRow('History freshness', safeText(integrity.historyFreshness)),
+        statRow('Snapshot freshness', safeText(integrity.snapshotFreshness)),
+        statRow('Last market data', safeText(integrity.lastMarketData)),
+        statRow('Last completed M5', safeText(integrity.lastCompletedM5)),
+        statRow('Data unavailable count', safeText(integrity.dataUnavailableCount, 0)),
+        statRow('Rejected records', safeText(integrity.rejectedRecords, 0)),
+        statRow('Duplicate guard count', safeText(integrity.duplicateGuardCount, 0)),
+        statRow('Evidence date range', safeText(integrity.evidenceDateRange)),
+        statRow('Evidence freshness', safeText(integrity.evidenceFreshness)),
+        statRow('Ledger count', safeText(integrity.ledgerCount, 0)),
+        statRow('Canonical main SHA', safeText(integrity.canonicalMainSha)),
+      ].join('');
+
+      document.getElementById('readinessGrid').innerHTML = [
+        statRow('30 trade sample', safeText(summary.accepted != null && summary.target != null ? `${summary.accepted} / ${summary.target}` : null)),
+        statRow('Expectancy', formatNumber(readiness.expectancy)),
+        statRow('Profit factor', safeText(readiness.profitFactor)),
+        statRow('Max drawdown', formatNumber(readiness.maxDrawdown)),
+        statRow('Consecutive losses', safeText(readiness.consecutiveLosses)),
+        statRow('P1 status', safeText(readiness.p1Status)),
+        statRow('Sample gate', safeText(readiness.sampleStatus)),
+        statRow('Expectancy gate', safeText(readiness.expectancyStatus)),
+        statRow('Profit factor gate', safeText(readiness.profitFactorStatus)),
+        statRow('Drawdown gate', safeText(readiness.drawdownStatus)),
+        statRow('Live authority', safeText(readiness.liveAuthority), true),
+      ].join('');
+
+      document.getElementById('safetyStrip').innerHTML = [
+        renderBadge(`BROKER WRITES: ${safeText(safety.brokerWrites)}`, 'danger'),
+        renderBadge(`PRACTICE ORDERS: ${safeText(safety.practiceOrders)}`, 'danger'),
+        renderBadge(`LIVE AUTHORITY: ${safeText(safety.liveAuthority)}`, 'danger'),
+        renderBadge(`KILL SWITCH: ${safeText(safety.killSwitch)}`),
+        renderBadge(`RISK HALT: ${safeText(safety.riskHalt)}`),
+        renderBadge(`OWNER CANCEL: ${safeText(safety.ownerCancel)}`),
+        renderBadge(`SECOND WRITER: ${safeText(safety.secondWriter)}`),
+        renderBadge(`RUNTIME ROOT MODE: ${safeText(safety.runtimeRootMode)}`),
+        renderBadge(`LOCK STATUS: ${safeText(safety.lockStatus)}`),
+      ].join('');
+
+      document.getElementById('sourceList').innerHTML = Object.entries(snapshot.sources || {})
+        .map(([key, value]) => `<div><span>${key}</span><code>${value}</code></div>`)
+        .join('');
+    }
+
+    async function poll() {
+      try {
+        const response = await fetch(API_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP_${response.status}`);
+        render(await response.json());
+      } catch (error) {
+        document.getElementById('campaignStatus').textContent = 'UNAVAILABLE';
+        document.getElementById('campaignStatus').className = 'pill danger';
+        document.getElementById('progressText').textContent = '—';
+        document.getElementById('progressPct').textContent = 'Unknown';
+        document.getElementById('remainingText').textContent = 'Local data unavailable';
+        document.getElementById('kpiGrid').innerHTML = metricCard('STATUS', 'UNAVAILABLE', error.message || 'Fetch failed');
+      } finally {
+        window.setTimeout(poll, REFRESH_MS);
+      }
+    }
+
+    poll();
+  </script>
+</body>
+</html>
