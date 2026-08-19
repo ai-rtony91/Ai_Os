@@ -24,6 +24,7 @@ from automation.forex_engine.forex_p1_paper_autostart_v1 import (
 LOCK_SCHEMA = "AIOS_TEST_RUNTIME_LOCK.v1"
 LOCK_CAMPAIGN = "AIOS_TEST_RUNTIME_LOCK_CAMPAIGN"
 LOCK_FINGERPRINT = "a" * 64
+LOCK_FINGERPRINT_OLD = "b" * 64
 LOCK_NOW = datetime(2026, 8, 15, 20, 0, tzinfo=timezone.utc)
 
 
@@ -33,6 +34,7 @@ def _owner(
     start: str | None = None,
     host: str = "test-host",
     boot: str = "boot-a",
+    fingerprint: str = LOCK_FINGERPRINT,
 ) -> autostart.RuntimeLockOwnership:
     return autostart.RuntimeLockOwnership(
         schema=LOCK_SCHEMA,
@@ -42,7 +44,7 @@ def _owner(
         host_identity=host,
         boot_identity=boot,
         campaign_identity=LOCK_CAMPAIGN,
-        source_fingerprint=LOCK_FINGERPRINT,
+        source_fingerprint=fingerprint,
     )
 
 
@@ -68,6 +70,7 @@ def _acquire(
     *,
     now: datetime = LOCK_NOW,
     pid: int = 101,
+    fingerprint: str = LOCK_FINGERPRINT,
     **overrides,
 ) -> autostart.RuntimeLockOwnership | None:
     options = {
@@ -81,7 +84,7 @@ def _acquire(
         path,
         schema=LOCK_SCHEMA,
         campaign_identity=LOCK_CAMPAIGN,
-        source_fingerprint_value=LOCK_FINGERPRINT,
+        source_fingerprint_value=fingerprint,
         ttl_seconds=60,
         now=now,
         pid=pid,
@@ -972,6 +975,117 @@ def test_runtime_lock_abrupt_termination_is_recoverable_after_ttl(tmp_path: Path
     )
     assert recovered is not None
     assert autostart.release_runtime_lock(path, recovered) is True
+
+
+def test_current_shape_lock_with_dead_owner_source_mismatch_recovers_and_records_receipt(
+    monkeypatch, tmp_path: Path
+) -> None:
+    path = tmp_path / "launch.lock"
+    stale = _owner(101, fingerprint=LOCK_FINGERPRINT_OLD)
+    _write_lock(
+        path,
+        stale,
+        acquired=LOCK_NOW - timedelta(minutes=2),
+        expires=LOCK_NOW - timedelta(minutes=1),
+    )
+    prior_bytes = path.read_bytes()
+    monkeypatch.setattr(autostart, "_host_identity", lambda: "test-host")
+    monkeypatch.setattr(autostart, "_boot_identity", lambda: "boot-a")
+
+    owner = _acquire(
+        path,
+        now=LOCK_NOW,
+        pid=202,
+        fingerprint=LOCK_FINGERPRINT,
+        process_start_reader=lambda _pid: (_ for _ in ()).throw(ProcessLookupError),
+    )
+
+    assert owner is not None
+    receipt = json.loads((tmp_path / "launch.lock.recovery.jsonl").read_text(encoding="utf-8"))
+    assert receipt["owner_state"] == "DEAD"
+    assert receipt["recovery_reason"] == "DEAD_OWNER_SOURCE_FINGERPRINT_MISMATCH"
+    assert receipt["prior_lock_id"] == stale.lock_id
+    assert receipt["prior_pid"] == stale.pid
+    assert receipt["prior_campaign_identity"] == LOCK_CAMPAIGN
+    assert receipt["prior_source_fingerprint"] == LOCK_FINGERPRINT_OLD
+    assert receipt["current_source_fingerprint"] == LOCK_FINGERPRINT
+    assert receipt["prior_metadata_sha256"] == __import__("hashlib").sha256(prior_bytes).hexdigest()
+    assert autostart.release_runtime_lock(path, owner) is True
+
+
+@pytest.mark.parametrize(
+    "process_reader, boot_identity",
+    [
+        (lambda _pid: "pid-101", lambda: "boot-a"),
+        (lambda _pid: (_ for _ in ()).throw(RuntimeError("unknown")), lambda: "boot-a"),
+    ],
+)
+def test_current_shape_lock_source_mismatch_blocks_active_or_unknown_owner(
+    monkeypatch,
+    tmp_path: Path,
+    process_reader,
+    boot_identity,
+) -> None:
+    path = tmp_path / "launch.lock"
+    stale = _owner(101, fingerprint=LOCK_FINGERPRINT_OLD)
+    _write_lock(
+        path,
+        stale,
+        acquired=LOCK_NOW - timedelta(minutes=2),
+        expires=LOCK_NOW - timedelta(minutes=1),
+    )
+    monkeypatch.setattr(autostart, "_host_identity", lambda: "test-host")
+    monkeypatch.setattr(autostart, "_boot_identity", boot_identity)
+
+    with pytest.raises(ValueError, match="RUNTIME_LOCK_METADATA_INVALID"):
+        _acquire(
+            path,
+            now=LOCK_NOW,
+            pid=202,
+            fingerprint=LOCK_FINGERPRINT,
+            process_start_reader=process_reader,
+        )
+
+
+@pytest.mark.parametrize(
+    "mutator",
+        [
+            lambda payload: payload.pop("source_fingerprint"),
+            lambda payload: payload.__setitem__("source_fingerprint", "not-a-sha256"),
+            lambda payload: payload.__setitem__("campaign_identity", "wrong-campaign"),
+            lambda payload: payload.__setitem__("pid", 0),
+            lambda payload: payload.__setitem__(
+                "expires_at_utc",
+                autostart._stamp(LOCK_NOW - timedelta(minutes=2)),
+            ),
+        ],
+    )
+def test_current_shape_lock_malformed_metadata_remains_blocked(
+    monkeypatch,
+    tmp_path: Path,
+    mutator,
+) -> None:
+    path = tmp_path / "launch.lock"
+    stale = _owner(101, fingerprint=LOCK_FINGERPRINT_OLD)
+    payload = autostart._lock_metadata(
+        stale,
+        acquired_at=LOCK_NOW - timedelta(minutes=2),
+        heartbeat_at=LOCK_NOW - timedelta(minutes=2),
+        expires_at=LOCK_NOW + timedelta(minutes=1),
+    )
+    mutator(payload)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(autostart, "_host_identity", lambda: "test-host")
+    monkeypatch.setattr(autostart, "_boot_identity", lambda: "boot-a")
+
+    with pytest.raises(ValueError, match="RUNTIME_LOCK_METADATA_INVALID"):
+        _acquire(
+            path,
+            now=LOCK_NOW,
+            pid=202,
+            fingerprint=LOCK_FINGERPRINT,
+            process_start_reader=lambda _pid: (_ for _ in ()).throw(ProcessLookupError),
+        )
 
 
 def test_windows_process_missing_pid_is_dead(monkeypatch) -> None:
