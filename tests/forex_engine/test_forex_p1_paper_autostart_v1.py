@@ -292,16 +292,68 @@ def test_preflight_equivalent_legacy_and_canonical_states_are_idempotent(tmp_pat
     assert (root / STATE_RELATIVE_PATH).read_bytes() == before
 
 
-def test_preflight_conflicting_legacy_and_canonical_states_blocks(tmp_path: Path) -> None:
+def test_preflight_canonical_valid_and_stale_legacy_different_accepts(
+    tmp_path: Path,
+) -> None:
     root = _repo(tmp_path, accepted=2)
+    canonical_payload = {
+        "accepted_qualifying_trades": 2,
+        "campaign_status": "WAITING_FOR_NEXT_RUN",
+        "active_position_status": "NONE",
+    }
+    (root / STATE_RELATIVE_PATH).write_text(
+        json.dumps(canonical_payload), encoding="utf-8"
+    )
     legacy = root / LEGACY_STATE_RELATIVE_PATH
     legacy.parent.mkdir(parents=True)
-    legacy.write_text(json.dumps({"accepted_qualifying_trades": 3}), encoding="utf-8")
+    legacy.write_text(
+        json.dumps({"accepted_qualifying_trades": 3, "campaign_status": "RUNNING"}),
+        encoding="utf-8",
+    )
 
     result = preflight(root, environment=_env(), branch_reader=lambda _: "main")
 
-    assert result.status == "BLOCKED"
-    assert result.reason == "CAMPAIGN_STATE_CONFLICT"
+    assert result.status == "READY"
+    assert result.accepted_trades == 2
+
+
+def test_preflight_canonical_valid_and_legacy_identical_accepts(tmp_path: Path) -> None:
+    root = _repo(tmp_path, accepted=4)
+    payload = {"accepted_qualifying_trades": 4, "campaign_status": "WAITING_FOR_NEXT_RUN"}
+    (root / STATE_RELATIVE_PATH).write_text(json.dumps(payload), encoding="utf-8")
+    legacy = root / LEGACY_STATE_RELATIVE_PATH
+    legacy.parent.mkdir(parents=True)
+    legacy.write_text(json.dumps(payload), encoding="utf-8")
+
+    result = preflight(root, environment=_env(), branch_reader=lambda _: "main")
+
+    assert result.status == "READY"
+    assert result.accepted_trades == 4
+
+
+def test_preflight_canonical_valid_and_newer_inconsistent_legacy_accepts(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path, accepted=2)
+    canonical_payload = {
+        "accepted_qualifying_trades": 2,
+        "campaign_status": "WAITING_FOR_NEXT_RUN",
+        "active_position_status": "NONE",
+    }
+    (root / STATE_RELATIVE_PATH).write_text(
+        json.dumps(canonical_payload), encoding="utf-8"
+    )
+    legacy = root / LEGACY_STATE_RELATIVE_PATH
+    legacy.parent.mkdir(parents=True)
+    legacy.write_text(
+        json.dumps({"accepted_qualifying_trades": 5, "campaign_status": "RUNNING"}),
+        encoding="utf-8",
+    )
+
+    result = preflight(root, environment=_env(), branch_reader=lambda _: "main")
+
+    assert result.status == "READY"
+    assert result.accepted_trades == 2
 
 
 def test_preflight_repeated_legacy_migration_preserves_canonical_bytes(tmp_path: Path) -> None:
@@ -341,8 +393,8 @@ def test_preflight_migration_rejects_canonical_state_appearing_before_publicatio
     monkeypatch.setattr(autostart, "_atomic_create_state", appear_newer)
     result = preflight(root, environment=_env(), branch_reader=lambda _: "main")
 
-    assert result.status == "BLOCKED"
-    assert result.reason == "CAMPAIGN_STATE_CONFLICT"
+    assert result.status == "READY"
+    assert result.accepted_trades == 8
     assert json.loads(canonical.read_text(encoding="utf-8"))["accepted_qualifying_trades"] == 8
 
 
@@ -368,8 +420,55 @@ def test_preflight_migration_never_replaces_newer_canonical_progress(
     monkeypatch.setattr(autostart, "_atomic_create_state", publish_newer)
     result = preflight(root, environment=_env(), branch_reader=lambda _: "main")
 
-    assert result.reason == "CAMPAIGN_STATE_CONFLICT"
+    assert result.status == "READY"
+    assert result.accepted_trades == 9
     assert json.loads(canonical.read_text(encoding="utf-8"))["accepted_qualifying_trades"] == 9
+
+
+def test_preflight_canonical_absent_and_valid_legacy_migrates_atomically(
+    tmp_path: Path,
+) -> None:
+    root = _repo_without_state(tmp_path)
+    legacy = root / LEGACY_STATE_RELATIVE_PATH
+    legacy.parent.mkdir(parents=True)
+    payload = {"accepted_qualifying_trades": 5, "campaign_status": "WAITING_FOR_NEXT_RUN"}
+    legacy.write_text(json.dumps(payload), encoding="utf-8")
+
+    result = preflight(root, environment=_env(), branch_reader=lambda _: "main")
+
+    assert result.status == "READY"
+    assert result.accepted_trades == 5
+    assert json.loads((root / STATE_RELATIVE_PATH).read_text(encoding="utf-8")) == payload
+
+
+def test_preflight_canonical_absent_and_malformed_legacy_blocks(tmp_path: Path) -> None:
+    root = _repo_without_state(tmp_path)
+    legacy = root / LEGACY_STATE_RELATIVE_PATH
+    legacy.parent.mkdir(parents=True)
+    legacy.write_text(json.dumps({"campaign_status": "WAITING_FOR_NEXT_RUN"}), encoding="utf-8")
+
+    result = preflight(root, environment=_env(), branch_reader=lambda _: "main")
+
+    assert result.status == "BLOCKED"
+    assert result.reason == "CAMPAIGN_ACCEPTED_COUNT_MISSING"
+
+
+def test_preflight_canonical_malformed_and_valid_legacy_blocks(tmp_path: Path) -> None:
+    root = _repo_without_state(tmp_path)
+    canonical = root / STATE_RELATIVE_PATH
+    canonical.parent.mkdir(parents=True)
+    canonical.write_text(json.dumps({"campaign_status": "WAITING_FOR_NEXT_RUN"}), encoding="utf-8")
+    legacy = root / LEGACY_STATE_RELATIVE_PATH
+    legacy.parent.mkdir(parents=True)
+    legacy.write_text(
+        json.dumps({"accepted_qualifying_trades": 5, "campaign_status": "WAITING_FOR_NEXT_RUN"}),
+        encoding="utf-8",
+    )
+
+    result = preflight(root, environment=_env(), branch_reader=lambda _: "main")
+
+    assert result.status == "BLOCKED"
+    assert result.reason == "CAMPAIGN_ACCEPTED_COUNT_MISSING"
 
 
 def test_preflight_specialized_active_campaign_blocks_launch(tmp_path: Path) -> None:

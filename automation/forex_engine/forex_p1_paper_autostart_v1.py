@@ -929,21 +929,20 @@ def _reconcile_campaign_state(root: Path) -> Mapping[str, object] | None:
     legacy_path = root / LEGACY_STATE_RELATIVE_PATH
     with _transition_serialization(canonical_path):
         canonical = _existing_state(canonical_path)
-        legacy = _existing_state(legacy_path)
-        if canonical is not None and legacy is not None:
-            if dict(canonical) != dict(legacy):
-                raise ValueError("CAMPAIGN_STATE_CONFLICT")
-            return canonical
         if canonical is not None:
             return canonical
+        legacy = _existing_state(legacy_path)
         if legacy is not None:
+            published = _existing_state(canonical_path)
+            if published is not None:
+                return published
             if not _atomic_create_state(canonical_path, legacy):
                 published = _existing_state(canonical_path)
-                if published is None or dict(published) != dict(legacy):
+                if published is None:
                     raise ValueError("CAMPAIGN_STATE_CONFLICT")
                 return published
             published = _existing_state(canonical_path)
-            if published is None or dict(published) != dict(legacy):
+            if published is None:
                 raise ValueError("CAMPAIGN_STATE_CONFLICT")
             return published
         return None
