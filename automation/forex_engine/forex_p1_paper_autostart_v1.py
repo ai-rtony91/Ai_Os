@@ -59,6 +59,9 @@ LOCK_RECOVERY_RECEIPT_FIELDS = frozenset(
     {
         "schema", "version", "observed_at_utc", "status",
         "prior_metadata_sha256", "new_lock_id", "campaign_identity",
+        "prior_lock_id", "prior_pid", "prior_campaign_identity",
+        "prior_source_fingerprint", "current_source_fingerprint",
+        "owner_state", "recovery_reason",
     }
 )
 
@@ -252,6 +255,35 @@ def _validate_runtime_lock_metadata(
     if payload.get("campaign_identity") != campaign_identity or payload.get("source_fingerprint") != source_fingerprint_value:
         raise ValueError("RUNTIME_LOCK_METADATA_INVALID")
     _validate_fingerprint(payload.get("source_fingerprint"))
+    acquired = _parse_lock_utc(payload.get("acquired_at_utc"))
+    heartbeat = _parse_lock_utc(payload.get("heartbeat_at_utc"))
+    expiration = _parse_lock_utc(payload.get("expires_at_utc"))
+    if heartbeat < acquired or expiration <= heartbeat:
+        raise ValueError("RUNTIME_LOCK_METADATA_INVALID")
+    return dict(payload)
+
+
+def _validate_runtime_lock_metadata_for_recovery(
+    payload: Any, *, schema: str, campaign_identity: str,
+) -> dict[str, Any]:
+    if not isinstance(payload, Mapping) or set(payload) != LOCK_METADATA_FIELDS:
+        raise ValueError("RUNTIME_LOCK_METADATA_INVALID")
+    if payload.get("schema") != schema or payload.get("version") != RUNTIME_LOCK_VERSION or payload.get("status") != "ACTIVE":
+        raise ValueError("RUNTIME_LOCK_METADATA_INVALID")
+    try:
+        uuid.UUID(str(payload.get("lock_id")))
+    except (ValueError, AttributeError) as exc:
+        raise ValueError("RUNTIME_LOCK_METADATA_INVALID") from exc
+    pid = payload.get("pid")
+    if isinstance(pid, bool) or not isinstance(pid, int) or pid < 1:
+        raise ValueError("RUNTIME_LOCK_METADATA_INVALID")
+    for field in ("process_start_identity", "host_identity", "boot_identity"):
+        value = payload.get(field)
+        if not isinstance(value, str) or not value.strip() or len(value) > 256:
+            raise ValueError("RUNTIME_LOCK_METADATA_INVALID")
+    _validate_fingerprint(payload.get("source_fingerprint"))
+    if payload.get("campaign_identity") != campaign_identity:
+        raise ValueError("RUNTIME_LOCK_METADATA_INVALID")
     acquired = _parse_lock_utc(payload.get("acquired_at_utc"))
     heartbeat = _parse_lock_utc(payload.get("heartbeat_at_utc"))
     expiration = _parse_lock_utc(payload.get("expires_at_utc"))
@@ -513,12 +545,22 @@ def _classify_legacy_lock_owner(
 def _append_lock_recovery_receipt(
     lock_path: Path, *, prior_metadata: bytes,
     owner: RuntimeLockOwnership, observed_at: datetime,
+    prior_lock_id: str | None = None, prior_pid: int | None = None,
+    prior_campaign_identity: str | None = None,
+    prior_source_fingerprint: str | None = None,
+    owner_state: str = "DEAD",
+    recovery_reason: str = "DEAD_OWNER_SOURCE_FINGERPRINT_MISMATCH",
 ) -> None:
     receipt = {
         "schema": LOCK_RECOVERY_RECEIPT_SCHEMA, "version": RUNTIME_LOCK_VERSION,
         "observed_at_utc": _stamp(observed_at), "status": "STALE_LOCK_RECOVERED",
         "prior_metadata_sha256": hashlib.sha256(prior_metadata).hexdigest(),
         "new_lock_id": owner.lock_id, "campaign_identity": owner.campaign_identity,
+        "prior_lock_id": prior_lock_id, "prior_pid": prior_pid,
+        "prior_campaign_identity": prior_campaign_identity,
+        "prior_source_fingerprint": prior_source_fingerprint,
+        "current_source_fingerprint": owner.source_fingerprint,
+        "owner_state": owner_state, "recovery_reason": recovery_reason,
     }
     if set(receipt) != LOCK_RECOVERY_RECEIPT_FIELDS:
         raise ValueError("RUNTIME_LOCK_RECEIPT_FIELD_VIOLATION")
@@ -579,10 +621,48 @@ def acquire_runtime_lock(
     with _transition_serialization(path):
         if _exclusive_create_lock(path, metadata):
             return owner
-        captured = _read_runtime_lock_capture(
-            path, schema=schema, campaign_identity=campaign_identity,
-            source_fingerprint_value=fingerprint,
-        )
+        try:
+            captured = _read_runtime_lock_capture(
+                path, schema=schema, campaign_identity=campaign_identity,
+                source_fingerprint_value=fingerprint,
+            )
+        except ValueError as current_error:
+            try:
+                prior_bytes = path.read_bytes()
+                recovery_candidate = _validate_runtime_lock_metadata_for_recovery(
+                    json.loads(prior_bytes.decode("utf-8")),
+                    schema=schema,
+                    campaign_identity=campaign_identity,
+                )
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError):
+                raise current_error
+            if recovery_candidate["source_fingerprint"] == fingerprint:
+                raise current_error
+            owner_state = classify_lock_owner(
+                recovery_candidate, current_host_identity=selected_host,
+                current_boot_identity=selected_boot, process_start_reader=reader,
+            )
+            if owner_state is not LockOwnerState.DEAD:
+                raise current_error
+            _atomic_replace_lock(path, metadata)
+            try:
+                _append_lock_recovery_receipt(
+                    path,
+                    prior_metadata=prior_bytes,
+                    owner=owner,
+                    observed_at=acquired_at,
+                    prior_lock_id=str(recovery_candidate["lock_id"]),
+                    prior_pid=int(recovery_candidate["pid"]),
+                    prior_campaign_identity=str(recovery_candidate["campaign_identity"]),
+                    prior_source_fingerprint=str(recovery_candidate["source_fingerprint"]),
+                    owner_state=owner_state.value,
+                    recovery_reason="DEAD_OWNER_SOURCE_FINGERPRINT_MISMATCH",
+                )
+            except RuntimeError:
+                if not _release_exact_owner_locked(path, owner):
+                    raise RuntimeError("RUNTIME_LOCK_RECEIPT_FAILED_AND_CLEANUP_FAILED") from None
+                raise RuntimeError("RUNTIME_LOCK_RECOVERY_RECEIPT_PERSISTENCE_FAILED") from None
+            return owner
         if captured is None:
             return owner if _exclusive_create_lock(path, metadata) else None
         prior_bytes, existing = captured
@@ -607,6 +687,12 @@ def acquire_runtime_lock(
             _append_lock_recovery_receipt(
                 path, prior_metadata=prior_bytes, owner=owner,
                 observed_at=acquired_at,
+                prior_lock_id=str(existing.get("lock_id")),
+                prior_pid=int(existing["pid"]),
+                prior_campaign_identity=str(existing.get("campaign_identity", campaign_identity)),
+                prior_source_fingerprint=str(existing.get("source_fingerprint", fingerprint)),
+                owner_state=owner_state.value,
+                recovery_reason="STALE_OWNER_RECOVERY",
             )
         except RuntimeError:
             if not _release_exact_owner_locked(path, owner):
