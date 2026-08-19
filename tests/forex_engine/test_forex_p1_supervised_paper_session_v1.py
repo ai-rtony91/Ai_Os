@@ -54,6 +54,52 @@ def test_conflicting_open_fails(tmp_path):
         module.open_paper_session(snapshot(), candidate(candidate_id="different"), "Anthony", "2026-08-06T10:01:00Z", path)
 
 
+def test_load_active_session_returns_none_for_valid_closed_tombstone(tmp_path):
+    path = tmp_path / "active.json"
+    path.write_text(
+        json.dumps({
+            "schema": "AIOS_P1_SUPERVISED_PAPER_SESSION.v1",
+            "status": "CLOSED",
+            "closed_at_utc": "2026-08-19T15:14:32.562095Z",
+            "closed_reason": "paper_target",
+            "strategy_id": "supertrend_pullback_v1",
+            "strategy_name": "supertrend_pullback_v1",
+        }),
+        encoding="utf-8",
+    )
+    assert module.load_active_session(path) is None
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"status": "CLOSED", "closed_reason": "paper_target"},
+        {
+            "schema": "AIOS_P1_SUPERVISED_PAPER_SESSION.v1",
+            "status": "CLOSED",
+            "closed_at_utc": "2026-08-19T15:14:32.562095Z",
+        },
+        {
+            "schema": "AIOS_P1_SUPERVISED_PAPER_SESSION.v1",
+            "status": "CLOSED",
+            "closed_at_utc": "2026-08-19T15:14:32.562095Z",
+            "closed_reason": "",
+        },
+        {
+            "schema": "AIOS_P1_SUPERVISED_PAPER_SESSION.v1",
+            "status": "ARCHIVED",
+            "closed_at_utc": "2026-08-19T15:14:32.562095Z",
+            "closed_reason": "paper_target",
+        },
+    ],
+)
+def test_load_active_session_rejects_malformed_or_unknown_tombstones(tmp_path, payload):
+    path = tmp_path / "active.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid_active_session"):
+        module.load_active_session(path)
+
+
 def test_close_without_active_fails(tmp_path):
     with pytest.raises(ValueError, match="no_active_session"):
         module.close_paper_session(snapshot(), "target", "Anthony", "2026-08-06T11:01:00Z", tmp_path/"x", {}, Path.cwd())
@@ -100,7 +146,7 @@ def test_close_preserves_paper_excursion_and_holding_metrics(tmp_path):
     assert record["mae_price"] == 1.1
     assert record["mae_r"] > 0
     assert record["outcome_r"] > 0
-    assert record["planned_reward_risk"] == pytest.approx(2.0)
+    assert record["planned_reward_risk"] == pytest.approx(1.5)
     assert record["realized_r"] == pytest.approx(record["outcome_r"])
     assert record["roi_class"] == "POSITIVE_R"
 

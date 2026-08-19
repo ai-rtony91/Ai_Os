@@ -143,9 +143,28 @@ def load_active_session(runtime_path: Path) -> dict[str, Any] | None:
     if not runtime_path.exists():
         return None
     value = json.loads(runtime_path.read_text(encoding="utf-8"))
-    if not isinstance(value, dict) or value.get("status") != "ACTIVE":
+    if not isinstance(value, dict):
         raise ValueError("invalid_active_session")
-    return value
+    status = value.get("status")
+    if status == "ACTIVE":
+        return value
+    if status == "CLOSED":
+        if value.get("schema") != "AIOS_P1_SUPERVISED_PAPER_SESSION.v1":
+            raise ValueError("invalid_active_session")
+        closed_at = value.get("closed_at_utc")
+        closed_reason = value.get("closed_reason")
+        if (
+            not isinstance(closed_at, str)
+            or not closed_at.endswith("Z")
+            or not isinstance(closed_reason, str)
+            or not closed_reason.strip()
+        ):
+            raise ValueError("invalid_active_session")
+        for key in ("strategy_id", "strategy_name"):
+            if key in value and (not isinstance(value[key], str) or not value[key].strip()):
+                raise ValueError("invalid_active_session")
+        return None
+    raise ValueError("invalid_active_session")
 
 
 def open_paper_session(snapshot: Mapping[str, Any], candidate: Mapping[str, Any], reviewer_identity: str, as_of_utc: str, runtime_path: Path) -> dict[str, Any]:

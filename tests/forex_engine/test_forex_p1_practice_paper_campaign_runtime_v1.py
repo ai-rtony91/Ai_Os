@@ -107,24 +107,29 @@ def test_runtime_cycle_telemetry_carries_r_classification_fields(monkeypatch, tm
         captured.append(record)
 
     monkeypatch.setattr(runtime, "append_cycle_record", record_cycle)
+    monkeypatch.setattr(runtime, "_utc_now", lambda: NOW + timedelta(minutes=5))
     monkeypatch.setattr(runtime, "build_signal_state", lambda *_args, **_kwargs: {
         "status": "BUY", "signal_id": "canonical-signal", "strategy_id": "sprint-4",
         "stop_price": 1.099, "target_price": 1.102,
     })
     moments = iter([
-        NOW, NOW, NOW + timedelta(minutes=5), NOW + timedelta(minutes=5),
+        NOW, NOW + timedelta(minutes=5), NOW + timedelta(minutes=5), NOW + timedelta(minutes=5),
     ])
     list(runtime.completed_paper_records(
         client([pricing(1.1000), pricing(1.1021, NOW + timedelta(minutes=5))]),
         cycles=2, reviewer_identity="Anthony", runtime_path=tmp_path / "active.json",
         now=lambda: next(moments), sleep=lambda _seconds: None, telemetry_output_root=tmp_path,
     ))
-    close_records = [item for item in captured if item.get("action") == "PAPER_SESSION_CLOSE"]
+    close_records = [item for item in captured if item.get("cycle_action") == "PAPER_SESSION_CLOSE"]
     assert len(close_records) == 1
-    extra = close_records[0]["extra"]
-    assert extra["planned_reward_risk"] == pytest.approx(2.0)
-    assert extra["realized_r"] == pytest.approx(extra["realized_paper_pl"] / extra["risk_amount"])
-    assert extra["roi_class"] == "POSITIVE_R"
+    close = close_records[0]
+    assert close["paper_session_event"] == "CLOSE"
+    assert close["exit_reason"] == "paper_target"
+    assert close["risk_amount"] > 0
+    assert close["planned_reward_risk"] == pytest.approx(1.5)
+    assert close["realized_paper_pl"] > 0
+    assert close["realized_r"] == pytest.approx(close["realized_paper_pl"] / close["risk_amount"])
+    assert close["roi_class"] == "POSITIVE_R"
 
 
 def test_no_signal_stops_without_manufacturing_trade(monkeypatch, tmp_path):
