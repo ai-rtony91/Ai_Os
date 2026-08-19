@@ -81,6 +81,25 @@ def test_runtime_opens_then_closes_one_paper_position(monkeypatch, tmp_path):
     assert closed["closed_reason"] == "paper_target"
 
 
+def test_runtime_close_uses_a_review_timestamp_not_cycle_start(monkeypatch, tmp_path):
+    monkeypatch.setattr(runtime, "build_signal_state", lambda *_args, **_kwargs: {
+        "status": "BUY", "signal_id": "canonical-signal", "strategy_id": "sprint-4",
+        "stop_price": 1.099, "target_price": 1.102,
+    })
+    review_time = NOW + timedelta(minutes=10)
+    moments = iter([NOW, NOW, NOW + timedelta(minutes=5), NOW + timedelta(minutes=5)])
+    monkeypatch.setattr(runtime, "_utc_now", lambda: review_time)
+    records = list(runtime.completed_paper_records(
+        client([pricing(1.1000), pricing(1.1021, NOW + timedelta(minutes=5))]),
+        cycles=2, reviewer_identity="Anthony", runtime_path=tmp_path / "active.json",
+        now=lambda: next(moments), sleep=lambda _seconds: None,
+    ))
+    closes = [item for item in records if isinstance(item, dict)]
+    assert len(closes) == 1
+    assert closes[0]["review_timestamp_utc"] == runtime._stamp(review_time)
+    assert closes[0]["exit_timestamp_utc"].endswith("Z")
+
+
 def test_runtime_cycle_telemetry_carries_r_classification_fields(monkeypatch, tmp_path):
     captured = []
 

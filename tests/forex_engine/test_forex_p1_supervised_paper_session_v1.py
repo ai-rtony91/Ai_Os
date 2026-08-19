@@ -63,6 +63,9 @@ def test_timestamp_and_instrument_close_validation(tmp_path):
     session = open_one(tmp_path/"active.json")
     with pytest.raises(ValueError, match="exit_must_follow_entry"): module.build_completed_trade_record(session, snapshot(), "target", "Anthony", "2026-08-06T11:00:00Z")
     with pytest.raises(ValueError, match="closing_instrument_mismatch"): module.build_completed_trade_record(session, snapshot(instrument="GBP_USD", observed_at_utc="2026-08-06T11:00:00Z"), "target", "Anthony", "2026-08-06T11:01:00Z")
+    record = module.build_completed_trade_record(session, snapshot(observed_at_utc="2026-08-06T11:00:00Z"), "target", "Anthony", "2026-08-06T11:00:00Z")
+    assert record["review_timestamp_utc"] == "2026-08-06T11:00:00Z"
+    assert record["exit_timestamp_utc"] == "2026-08-06T11:00:00Z"
 
 
 def test_conservative_ask_to_bid_result_ignores_mid(tmp_path):
