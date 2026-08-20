@@ -3,120 +3,37 @@ name: CI
 on:
   pull_request:
   push:
-    branches:
-      - main
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
+      - name: Resolve exact source SHA
+        id: source
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == pull_request ]]; then expected="$PR_HEAD_SHA"; else expected="$PUSH_SHA"; fi
+          [[ "$expected" =~ ^[0-9a-f]{40}$ ]] || { echo SHA_SOURCE_UNAVAILABLE_BLOCKED; exit 1; }
+          echo "sha=$expected" >> "$GITHUB_OUTPUT"
+      - name: Checkout exact source
         uses: actions/checkout@v6
-
-      - name: Check required governance files
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f SECURITY.md
-          test -f COMPLIANCE_BASELINE.md
-          test -f LICENSE
-          test -f .github/dependabot.yml
-          test -f docs/security/threat-model.md
-          test -f docs/security/approval-model.md
-          test -f docs/security/audit-logging.md
-          test -f docs/security/secret-prevention.md
-          test -f docs/security/repo-hygiene.md
-
-      - name: Check workflow syntax
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f .github/workflows/ci.yml
-          grep -q "name: CI" .github/workflows/ci.yml
-          grep -q "runs-on: ubuntu-latest" .github/workflows/ci.yml
-
-      - name: PowerShell syntax check
-        shell: pwsh
-        run: |
-          $files = Get-ChildItem -Path . -Recurse -File -Filter '*.ps1' | Sort-Object FullName
-
-          if (-not $files) {
-            Write-Host "No PowerShell scripts found."
-            return
-          }
-
-          $failed = $false
-          foreach ($file in $files) {
-            $tokens = $null
-            $errors = $null
-            $null = [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref] $tokens, [ref] $errors)
-
-            if ($errors.Count -gt 0) {
-              $failed = $true
-              foreach ($parseError in $errors) {
-                Write-Host ("{0}:{1}:{2}: {3}" -f $file.FullName, $parseError.Extent.StartLineNumber, $parseError.Extent.StartColumnNumber, $parseError.Message)
-              }
-            }
-          }
-
-          if ($failed) {
-            exit 1
-          }
-
-      - name: Check placeholder identity strings in source files
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -RInE "youremail@example.com|your-github-email" \
-            --include="*.py" \
-            --include="*.ps1" \
-            --include="*.json" \
-            --include="*.yml" \
-            --include="*.yaml" \
-            --exclude-dir=.git \
-            --exclude-dir=.github \
-            --exclude-dir=tests \
-            .; then
-            echo "Placeholder identity string found in source/config files."
-            exit 1
-          fi
-
-      - name: Check obvious secret assignments in source files
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -RInP "\b(api_key|apikey|secret|token|password|broker)\b[[:space:]]*[:=]\s*['\"](?!BLOCKED|NONE|MISSING|EXAMPLE|placeholder|changeme|your_|demo_)[^'\"]+['\"]" \
-            --include="*.py" \
-            --include="*.ps1" \
-            --include="*.json" \
-            --include="*.yml" \
-            --include="*.yaml" \
-            --exclude-dir=.git \
-            --exclude-dir=.github \
-            --exclude-dir=docs \
-            --exclude-dir=tests \
-            .; then
-            echo "Potential secret-like assignment found in source/config files."
-            exit 1
-          fi
-
-      - name: Python syntax check for core source
-        shell: bash
-        run: |
-          set -euo pipefail
-          paths=""
-          for dir in aios agent services apps scripts automation; do
-            if test -d "$dir"; then
-              paths="$paths $dir"
-            fi
-          done
-
-          if test -n "$paths"; then
-            python -m compileall $paths
-          else
-            echo "No core Python source directories found."
-          fi
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Shared Dual-CI validation
+        env:
+          EXPECTED_SHA: ${{ steps.source.outputs.sha }}
+          RECEIPT: ${{ runner.temp }}/aios-github-receipt.json
+        run: python -B scripts/ci/run_aios_dual_ci_validation_v1.py --provider GITHUB_ACTIONS --expected-sha "$EXPECTED_SHA" --receipt "$RECEIPT"

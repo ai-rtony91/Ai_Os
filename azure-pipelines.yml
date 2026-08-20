@@ -1,0 +1,34 @@
+trigger:
+  branches:
+    include: ['*']
+pr:
+  branches:
+    include: ['*']
+
+pool:
+  vmImage: ubuntu-24.04
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+    persistCredentials: false
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.12'
+  - bash: |
+      set -euo pipefail
+      if [[ "${BUILD_REASON:-}" == PullRequest ]]; then
+        expected="${SYSTEM_PULLREQUEST_SOURCECOMMITID:-}"
+      else
+        expected="${BUILD_SOURCEVERSION:-}"
+      fi
+      [[ "$expected" =~ ^[0-9a-f]{40}$ ]] || { echo SHA_SOURCE_UNAVAILABLE_BLOCKED; exit 1; }
+      python -B scripts/ci/run_aios_dual_ci_validation_v1.py \
+        --provider AZURE_PIPELINES --expected-sha "$expected" \
+        --receipt "${AGENT_TEMPDIRECTORY}/aios-azure-receipt.json"
+    displayName: Shared Dual-CI validation
+    env:
+      BUILD_REASON: $(Build.Reason)
+      SYSTEM_PULLREQUEST_SOURCECOMMITID: $(System.PullRequest.SourceCommitId)
+      BUILD_SOURCEVERSION: $(Build.SourceVersion)
+      AGENT_TEMPDIRECTORY: $(Agent.TempDirectory)
