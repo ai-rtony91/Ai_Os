@@ -63,6 +63,9 @@ SUPER_TREND_LOCK_CAMPAIGN_IDENTITY = "FOREX_P1_MULTIPAIR_NORMALIZED_PAPER_RUNTIM
 SUPER_TREND_LOCK_TTL_SECONDS = 300
 SUPER_TREND_LOCK_PATH_SUFFIX = ".multipair.paper.runtime.lock"
 POLL_INTERVAL_SECONDS = 300
+DATA_UNAVAILABLE_BACKOFF_BASE_SECONDS = 30
+DATA_UNAVAILABLE_BACKOFF_MAX_SECONDS = POLL_INTERVAL_SECONDS
+MAX_CONSECUTIVE_STARTUP_DATA_FAILURES = 5
 DEFAULT_PAPER_UNITS = 100
 SAFETY = {
     "broker_write_performed": False,
@@ -170,6 +173,70 @@ def _read_lock(lock_path: Path) -> dict[str, Any] | None:
         campaign_identity=SUPER_TREND_LOCK_CAMPAIGN_IDENTITY,
         source_fingerprint_value=_runtime_source_fingerprint(),
     )
+
+
+def _data_unavailable_backoff_seconds(consecutive_failures: int) -> int:
+    if consecutive_failures <= 0:
+        raise ValueError("positive_consecutive_failure_count_required")
+    exponent = min(consecutive_failures - 1, 4)
+    return min(
+        DATA_UNAVAILABLE_BACKOFF_BASE_SECONDS * (2 ** exponent),
+        DATA_UNAVAILABLE_BACKOFF_MAX_SECONDS,
+    )
+
+
+def _is_transient_read_failure(exc: OandaReadOnlyClientError) -> bool:
+    return exc.public_reason in {"NETWORK_ERROR_SANITIZED", "HTTP_ERROR_SANITIZED"}
+
+
+def _append_wait_for_data(
+    *,
+    paths: CampaignPaths,
+    cycle_number: int,
+    maximum_cycles: int,
+    now: datetime,
+    next_check_in_seconds: int | None,
+    active_position_status: str,
+) -> None:
+    _append_jsonl(
+        paths.telemetry,
+        _cycle_record(
+            cycle_number=cycle_number,
+            maximum_cycles=maximum_cycles,
+            action="WAIT_FOR_DATA",
+            now=now,
+            extra={
+                "paper_session_event": "NONE",
+                "candidate_status": "NONE",
+                "paper_eligible": False,
+                "wait_reason": "data_unavailable",
+                "active_position_status": active_position_status,
+                "universe_fingerprint": None,
+            },
+            rejection_reasons=("data_unavailable",),
+            next_check_in_seconds=next_check_in_seconds,
+        ),
+    )
+
+
+def _discover_universe_with_retry(
+    client: OandaReadOnlyClient,
+    *,
+    sleep: Callable[[float], None],
+    max_attempts: int = MAX_CONSECUTIVE_STARTUP_DATA_FAILURES,
+) -> dict[str, Any]:
+    last_error: OandaReadOnlyClientError | None = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return discover_fixed_universe(client)
+        except OandaReadOnlyClientError as exc:
+            last_error = exc
+            if not _is_transient_read_failure(exc):
+                raise
+            if attempt >= max_attempts:
+                raise OandaReadOnlyClientError("PRACTICE_NETWORK_UNAVAILABLE") from exc
+            sleep(_data_unavailable_backoff_seconds(attempt))
+    raise OandaReadOnlyClientError("PRACTICE_NETWORK_UNAVAILABLE") from last_error
 
 
 def _candidate_from_replay(
@@ -372,7 +439,7 @@ def run_normalized_multipair_campaign(
         raise ValueError("owner_reviewer_required")
     runtime_root.mkdir(parents=True, exist_ok=True)
     paths = CampaignPaths(runtime_root)
-    universe = discover_fixed_universe(client)
+    universe = _discover_universe_with_retry(client, sleep=sleep)
     eligible = [
         NormalizedInstrument(
             instrument=item["instrument"],
@@ -414,7 +481,24 @@ def run_normalized_multipair_campaign(
             if risk_halt_active():
                 break
             active = load_active_session(paths.active_session)
-            pricing = client.pricing(tuple(item.instrument for item in eligible))
+            try:
+                pricing = client.pricing(tuple(item.instrument for item in eligible))
+            except OandaReadOnlyClientError as exc:
+                if not _is_transient_read_failure(exc):
+                    raise
+                next_wait_seconds = _data_unavailable_backoff_seconds(1)
+                _append_wait_for_data(
+                    paths=paths,
+                    cycle_number=cycle,
+                    maximum_cycles=cycles,
+                    now=current,
+                    next_check_in_seconds=next_wait_seconds,
+                    active_position_status="ACTIVE" if active else "NONE",
+                )
+                last_action = "WAIT_FOR_DATA"
+                last_reason = "data_unavailable"
+                sleep(next_wait_seconds)
+                continue
             quote_mids = quote_mids_from_pricing(pricing)
             if active:
                 instrument_name = str(active["instrument"])
