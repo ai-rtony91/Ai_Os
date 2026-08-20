@@ -609,7 +609,7 @@ Ai.Os is not a separate GitHub repository.
 
 Current identity:
 
-- GitHub repo: `ai-rtony91/Ai_Os`
+- GitHub repo: `ai-rtony91/Ai_Os-Forex`
 - Active branch: `main`
 - Current local folder: `C:\Dev\Ai.Os`
 - Legacy inactive local folders:
@@ -628,9 +628,9 @@ Do not search for or assume:
 - `AI-OS-Project`
 - `Ai.Os`
 
-Any AI, Codex, Claude, or assistant inspecting legacy AI_OS_V2 material must target repo `ai-rtony91/Ai_Os` on branch `main` unless the user explicitly says otherwise.
+Any AI, Codex, Claude, or assistant inspecting legacy AI_OS_V2 material must target repo `ai-rtony91/Ai_Os-Forex` on branch `main` unless the user explicitly says otherwise.
 
-If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check branch `main` before judging project state.
+If a tool only sees `ai-rtony91/Ai_Os-Forex`, that is correct. It must switch/check branch `main` before judging project state.
 
 The old `v2/aios` branch is legacy/reference unless the operator explicitly instructs otherwise.
 
