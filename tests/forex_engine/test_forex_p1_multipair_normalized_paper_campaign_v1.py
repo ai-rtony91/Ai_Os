@@ -65,6 +65,31 @@ class FakeClient(OandaReadOnlyClient):
         }
 
 
+class TransientStartupClient(FakeClient):
+    def __init__(self, failures: int) -> None:
+        super().__init__()
+        self.failures = failures
+        self.discover_calls = 0
+
+    def discover_instruments(self) -> dict:
+        self.discover_calls += 1
+        if self.discover_calls <= self.failures:
+            raise module.OandaReadOnlyClientError("NETWORK_ERROR_SANITIZED")
+        return super().discover_instruments()
+
+
+class TransientPricingClient(FakeClient):
+    def __init__(self, failures: int) -> None:
+        super().__init__()
+        self.failures = failures
+
+    def pricing(self, instruments: tuple[str, ...]) -> dict:
+        self.pricing_calls += 1
+        if self.pricing_calls <= self.failures:
+            raise module.OandaReadOnlyClientError("NETWORK_ERROR_SANITIZED")
+        return super().pricing(instruments)
+
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -183,3 +208,91 @@ def test_normalized_campaign_opens_then_closes_and_records_trade(monkeypatch):
     tombstone = json.loads((runtime_root / "active.json").read_text(encoding="utf-8"))
     assert tombstone["status"] == "CLOSED"
     assert tombstone["closed_reason"] == "paper_target"
+
+
+def test_startup_discovery_retries_transient_network_failures(monkeypatch):
+    client = TransientStartupClient(failures=2)
+    runtime_root = _runtime_root("startup_retry")
+    sleeps = []
+    monkeypatch.setattr(module, "_acquire_lock", lambda *args, **kwargs: object())
+    monkeypatch.setattr(module, "_touch_lock", lambda *args, **kwargs: True)
+    monkeypatch.setattr(module, "_release_lock", lambda *args, **kwargs: True)
+    monkeypatch.setattr(module, "replay_candidate", lambda *args, **kwargs: None)
+    state = module.run_normalized_multipair_campaign(
+        client,
+        cycles=1,
+        reviewer_identity="Human Owner Anthony",
+        runtime_root=runtime_root,
+        now=lambda: datetime(2026, 8, 1, 10, 30, tzinfo=timezone.utc),
+        sleep=sleeps.append,
+    )
+    assert client.discover_calls == 3
+    assert sleeps == [30, 60, 300]
+    assert state["campaign_status"] == "RUNNING"
+
+
+def test_startup_backoff_sequence_is_bounded():
+    assert [module._data_unavailable_backoff_seconds(i) for i in range(1, 7)] == [30, 60, 120, 240, 300, 300]
+
+
+def test_pricing_transient_failure_records_wait_for_data(monkeypatch):
+    client = TransientPricingClient(failures=1)
+    runtime_root = _runtime_root("pricing_wait")
+    monkeypatch.setattr(module, "_acquire_lock", lambda *args, **kwargs: object())
+    monkeypatch.setattr(module, "_touch_lock", lambda *args, **kwargs: True)
+    monkeypatch.setattr(module, "_release_lock", lambda *args, **kwargs: True)
+    monkeypatch.setattr(module, "replay_candidate", lambda *args, **kwargs: None)
+    sleeps = []
+    state = module.run_normalized_multipair_campaign(
+        client,
+        cycles=1,
+        reviewer_identity="Human Owner Anthony",
+        runtime_root=runtime_root,
+        now=lambda: datetime(2026, 8, 1, 10, 30, tzinfo=timezone.utc),
+        sleep=sleeps.append,
+    )
+    telemetry = (runtime_root / "AIOS_FOREX_MULTIPAIR_NORMALIZED_CYCLE_PROVENANCE.jsonl").read_text(encoding="utf-8")
+    assert "WAIT_FOR_DATA" in telemetry
+    assert "data_unavailable" in telemetry
+    assert sleeps == [30]
+    assert state["campaign_status"] == "RUNNING"
+
+
+def test_active_position_pricing_failure_waits_without_closing(monkeypatch):
+    client = TransientPricingClient(failures=1)
+    runtime_root = _runtime_root("active_wait")
+    active_path = runtime_root / "active.json"
+    active_path.write_text(
+        json.dumps(
+            {
+                "schema": "AIOS_P1_SUPERVISED_PAPER_SESSION.v1",
+                "status": "ACTIVE",
+                "instrument": "EUR_USD",
+                "entry_price": 1.1000,
+                "stop_price": 1.0990,
+                "target_price": 1.1020,
+                "quote_currency": "USD",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(module, "_acquire_lock", lambda *args, **kwargs: object())
+    monkeypatch.setattr(module, "_touch_lock", lambda *args, **kwargs: True)
+    monkeypatch.setattr(module, "_release_lock", lambda *args, **kwargs: True)
+    sleeps = []
+    state = module.run_normalized_multipair_campaign(
+        client,
+        cycles=1,
+        reviewer_identity="Human Owner Anthony",
+        runtime_root=runtime_root,
+        now=lambda: datetime(2026, 8, 1, 10, 30, tzinfo=timezone.utc),
+        sleep=sleeps.append,
+    )
+    assert (runtime_root / "active.json").read_text(encoding="utf-8").find('"status": "ACTIVE"') != -1
+    telemetry = (runtime_root / "AIOS_FOREX_MULTIPAIR_NORMALIZED_CYCLE_PROVENANCE.jsonl").read_text(encoding="utf-8")
+    assert "WAIT_FOR_DATA" in telemetry
+    assert "PAPER_SESSION_CLOSE" not in telemetry
+    assert state["campaign_status"] == "RUNNING"
